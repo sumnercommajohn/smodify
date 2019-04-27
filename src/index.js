@@ -1,4 +1,5 @@
 import React from 'react';
+import './main.scss';
 import ReactDOM from 'react-dom';
 
 class Welcome extends React.Component {
