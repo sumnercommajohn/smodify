@@ -1,13 +1,10 @@
+const merge = require('webpack-merge');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const common = require('./webpack.common');
 
-module.exports = {
-  entry: './src/index.js',
-  output: {
-    path: `${__dirname}/dist`,
-    publicPath: '/',
-    filename: 'main.[contentHash].js',
-  },
+module.exports = merge(common, {
+  mode: 'development',
   devServer: {
     contentBase: './dist',
   },
@@ -29,4 +26,4 @@ module.exports = {
       template: path.resolve('./src/index.html'),
     }),
   ],
-};
+});

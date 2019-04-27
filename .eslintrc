@@ -13,7 +13,8 @@
       }
     ],
     "linebreak-style": 0,
-    "react/prefer-stateless-function": 1
+    "react/prefer-stateless-function": 1,
+    "import/no-extraneous-dependencies": [0, { "devDependencies": true }]
   },
   "settings": {
     "react": {
