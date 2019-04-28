@@ -1,11 +1,7 @@
 import React from 'react';
 import './main.scss';
 import ReactDOM from 'react-dom';
+import App from './components/App';
 
-class Welcome extends React.Component {
-  render() {
-    return <h1>Welcome To Shmotify</h1>;
-  }
-}
 
-ReactDOM.render(<Welcome />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));

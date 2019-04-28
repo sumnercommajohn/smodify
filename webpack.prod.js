@@ -1,7 +1,7 @@
-
 const merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const path = require('path');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -9,6 +9,11 @@ const common = require('./webpack.common');
 
 module.exports = merge(common, {
   mode: 'production',
+  devtool: 'source-map',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.[contentHash].js',
+  },
   optimization: {
     minimizer: [
       new OptimizeCssAssetsPlugin(),

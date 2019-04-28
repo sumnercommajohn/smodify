@@ -5,8 +5,15 @@ const common = require('./webpack.common');
 
 module.exports = merge(common, {
   mode: 'development',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.[hash].js',
+    publicPath: '/',
+  },
   devServer: {
     contentBase: './dist',
+    hot: true,
+    port: 8080,
   },
   module: {
     rules: [

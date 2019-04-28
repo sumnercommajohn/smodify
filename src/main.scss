@@ -20,10 +20,10 @@ html {
 }
 
 body {
-  background-color: seagreen;
+  background-color: rgba(0, 0, 0, 0.15);
   background-image: url("./assets/img/3contour.svg");
   min-height: calc(100vh - 100px);
-  margin: 50px;
+  margin: 0 50px;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -53,4 +53,16 @@ a {
 ul {
   list-style: none;
   padding: 0;
+}
+
+.title {
+  font-size: 8rem;
+}
+
+.app {
+  grid-template-columns: 1fr;
+  height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
 }
