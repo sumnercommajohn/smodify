@@ -61,7 +61,7 @@ class App extends React.Component {
         <img src={macaroon} alt="" />
         <h1 className="title">Smodify.</h1>
         { this.state.user ? this.renderWelcome() : this.renderLoginLink() }
-        <button type="button" onClick={this.getProfile}>Get Profile Data</button>
+
       </div>
     );
   }
