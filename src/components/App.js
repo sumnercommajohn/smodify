@@ -11,19 +11,19 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.state.token);
-    if (!this.state.token) {
-      this.setToken();
+    const token = getHash();
+    if (token) {
+      this.setToken(token);
+      this.getProfile(token);
     }
   }
 
-  setToken = () => {
-    const token = getHash();
+  setToken = (token) => {
     this.setState({ token });
   }
 
-  getProfile = () => {
-    const authToken = this.state.token;
+  getProfile = (token) => {
+    const authToken = token;
     const myHeaders = new Headers();
 
     myHeaders.append('Authorization', `Bearer ${authToken}`);
