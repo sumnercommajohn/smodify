@@ -2,7 +2,7 @@ import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import macaroon from '../assets/img/Macaroonicon.png';
 import authQuery from '../config/authConfig';
-import getHash from '../config/hash';
+import getHash from '../config/getHash';
 
 class App extends React.Component {
   state = {
