@@ -9,6 +9,6 @@ const scopes = [
   'user-read-birthdate',
 ];
 const responseType = 'token';
-const authQuery = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=true`;
+const authQuery = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=false`;
 
 export default authQuery;
