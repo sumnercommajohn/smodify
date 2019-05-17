@@ -1,8 +1,8 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
+import { authQuery, getTokenFromURI } from '../config/authConfig';
 import macaroon from '../assets/img/Macaroonicon.png';
-import authQuery from '../config/authConfig';
-import getHash from '../config/getHash';
+
 
 class App extends React.Component {
   state = {
@@ -11,7 +11,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    const token = getHash();
+    const token = getTokenFromURI();
     if (token) {
       this.setToken(token);
       this.getProfile(token);

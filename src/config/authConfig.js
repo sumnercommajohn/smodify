@@ -9,6 +9,20 @@ const scopes = [
   'user-read-birthdate',
 ];
 const responseType = 'token';
-const authQuery = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=false`;
+export const authQuery = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}`;
 
-export default authQuery;
+export const getTokenFromURI = () => {
+  const hash = window.location.hash
+    .substring(1)
+    .split('&')
+    .reduce((initial, item) => {
+      if (item) {
+        const parts = item.split('=');
+        initial[parts[0]] = decodeURIComponent(parts[1]);
+      }
+      return initial;
+    }, {});
+  window.location.hash = '';
+
+  return hash.access_token || null;
+};
