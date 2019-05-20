@@ -1,4 +1,4 @@
-export const getAuthQuery = (dialog = false) => {
+export const getAuthURL = (showDialog = false) => {
   const authEndpoint = 'https://accounts.spotify.com/authorize';
   const clientId = '10a41ddfc787418f9ef272f0bf886e86';
   const redirectUri = 'http://localhost:8080/';
@@ -8,10 +8,9 @@ export const getAuthQuery = (dialog = false) => {
     'playlist-modify-private',
   ];
   const responseType = 'token';
-  const showDialog = dialog;
 
-  const authQuery = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=${showDialog}`;
-  return authQuery;
+  const authURL = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=${showDialog}`;
+  return authURL;
 };
 
 export const getTokenFromURI = () => {
@@ -27,7 +26,7 @@ export const getTokenFromURI = () => {
     }, {});
   window.location.hash = '';
 
-  return hash.access_token || null;
+  return hash.access_token || '';
 };
 
 export const checkURIforError = () => {

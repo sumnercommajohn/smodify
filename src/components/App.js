@@ -1,39 +1,41 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { checkURIforError, getTokenFromURI, getAuthQuery } from '../config/authConfig';
+import { checkURIforError, getTokenFromURI, getAuthURL } from '../config/authConfig';
 import macaroon from '../assets/img/Macaroonicon.png';
 
 
 class App extends React.Component {
   state = {
-    token: null,
-    user: null,
+    token: '',
+    user: '',
     error: false,
+    errorMessage: '',
   }
 
   componentDidMount() {
-    const error = checkURIforError();
+    const authError = checkURIforError();
     const token = getTokenFromURI();
+    this.setAuthError(authError);
     if (token) {
       this.setToken(token);
       this.getProfile(token);
     }
-    this.setError(error);
   }
 
   setToken = (token) => {
     this.setState({ token });
   }
 
-  setError = (error) => {
-    this.setState({ error });
+  setAuthError = (error) => {
+    const errorMessage = error
+      ? 'Access denied by user'
+      : '';
+    this.setState({ error, errorMessage });
   }
 
   getProfile = (token) => {
-    const authToken = token;
     const myHeaders = new Headers();
-
-    myHeaders.append('Authorization', `Bearer ${authToken}`);
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
     fetch('https://api.spotify.com/v1/me', {
       method: 'GET',
@@ -46,49 +48,68 @@ class App extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((userData) => {
-        const user = userData.id;
-        this.setState({ user });
-        this.setState({ error: false });
+        console.log(userData);
+        const user = userData.display_name;
+        this.setState(prevState => ({
+          ...prevState,
+          user,
+          error: false,
+          errorMessage: '',
+        }));
       })
-      .catch(() => this.setState({ error: true }));
+      .catch((error) => {
+        this.setState({
+          error: true,
+          errorMessage: error.message,
+        });
+      });
   }
-
-  renderLoginLink = () => (
-    <a href={getAuthQuery()}>Login to Spotify</a>
-  )
-
-  renderWelcome = () => {
-    const displayName = this.state.user;
-    return (
-      <div>
-
-        <h3>Welcome, {displayName}
-          <small><a href={getAuthQuery(true)}> (Not You?)</a></small>
-        </h3>
-
-      </div>
-    );
-  }
-
-  renderError = () => (
-    <p className="warning">
-        Something weird happened. You should try again.
-    </p>
-  )
-
 
   render() {
     return (
       <div className="app">
         <img src={macaroon} alt="" />
         <h1 className="title">Smodify.</h1>
-        {this.state.error && this.renderError() }
-        { this.state.user ? this.renderWelcome() : this.renderLoginLink() }
-
-
+        { this.state.error && <ErrorMessage message={this.state.errorMessage} /> }
+        { this.state.user ? <Welcome user={this.state.user} /> : <LoginLink message="Login to Spotify" /> }
       </div>
     );
   }
 }
+
+const Welcome = (props) => {
+  const displayName = props.user.split(' ');
+  return (
+    <div>
+      <h3>Welcome, {displayName[0]}
+        <small><LoginLink dialog message=" (Not You?)" /></small>
+      </h3>
+
+    </div>
+  );
+};
+
+const ErrorMessage = props => (
+  <div className="warning">
+    <p>
+      Something weird happened:
+    </p>
+    <p>
+      <strong>
+        {props.message}.
+      </strong>
+    </p>
+    <p>
+      You should try again.
+    </p>
+  </div>
+);
+
+const LoginLink = (props) => {
+  const { message, dialog } = props;
+  return (
+    <a href={getAuthURL(dialog)}>{message}</a>
+  );
+};
 
 export default hot(App);
