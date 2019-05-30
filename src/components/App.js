@@ -78,11 +78,11 @@ class App extends React.Component {
 }
 
 const Welcome = (props) => {
-  const displayName = props.user.split(' ');
+  const [firstName] = props.user.split(' ');
   return (
     <div>
-      <h3>Welcome, {displayName[0]}
-        <small><LoginLink dialog message=" (Not You?)" /></small>
+      <h3>Welcome, {firstName}
+        <span className="text-small"><LoginLink dialog message=" (Not You?)" /></span>
       </h3>
 
     </div>
@@ -94,10 +94,8 @@ const ErrorMessage = props => (
     <p>
       Something weird happened:
     </p>
-    <p>
-      <strong>
-        {props.message}.
-      </strong>
+    <p className="text-bold">
+      {props.message}.
     </p>
     <p>
       You should try again.
