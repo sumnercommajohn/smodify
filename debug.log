@@ -765,3 +765,4 @@
 [0605/173811.242:ERROR:process_memory_win.cc(73)] ReadMemory at 0x7fff77dfb264 of 512 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
 [0605/173811.242:ERROR:process_memory_win.cc(73)] ReadMemory at 0x7fff77dfe214 of 608 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
 [0605/173811.507:ERROR:scoped_process_suspend.cc(40)] NtResumeProcess: An attempt was made to access an exiting process. (0xc000010a)
+[0606/170210.076:ERROR:settings.cc(320)] Settings magic is not 1129342067

@@ -1,13 +1,13 @@
 import React from 'react';
-import { Playlist } from './Playlist';
+import { PlaylistItem } from './PlaylistItem';
 
 export const UserPlaylists = (props) => {
   const { playlists } = props;
   console.log(playlists.items);
   return (
-    <ul>
+    <ul className="user-playlists">
       {playlists.items.length
-        ? playlists.items.map(playlist => (<Playlist key={playlist.id} name={playlist.name} />))
+        ? playlists.items.map(playlist => (<PlaylistItem key={playlist.id} playlist={playlist} />))
         : <p>Loading...</p>}
     </ul>
   );
