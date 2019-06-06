@@ -89,6 +89,20 @@ ul {
   padding: 1rem;
 }
 
+.user-playlists {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: right;
+}
+
+.playlist-item {
+  width: 100%;
+  font-size: 1.5rem;
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr;
+  align-items: stretch;
+}
+
 .app img {
   max-width: 250px;
 }

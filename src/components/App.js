@@ -111,7 +111,7 @@ class App extends React.Component {
       <div className="app">
         <nav className="sidebar">
           <h2>Sidebar</h2>
-          { user ? <Welcome user={user} /> : <LoginLink message="Login to Spotify" /> }
+          { user ? <Welcome user={user} /> : <LoginLink message="Login to Spotify to get started." /> }
         </nav>
 
         <Dashboard playlists={playlists} errorMessage={errorMessage} />
