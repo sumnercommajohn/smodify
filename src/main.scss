@@ -22,7 +22,8 @@ body {
   background-color: rgba(0, 0, 0, 0.15);
   background-image: url("./assets/img/3contour.svg");
   min-height: calc(100vh - 100px);
-  margin: 0 50px;
+  margin: 0;
+
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -59,11 +60,33 @@ ul {
 }
 
 .app {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 3fr;
   height: 100vh;
+  display: grid;
+}
+
+.dashboard {
+  height: 100vh;
+  width: 100%;
+  padding: 1rem;
+  display: grid;
+}
+
+.logo {
   display: grid;
   align-content: center;
   justify-items: center;
+}
+
+.logo-tagline {
+  font-weight: 900;
+  margin: 0;
+}
+
+.sidebar {
+  background-color: black;
+  color: #fbfbfb;
+  padding: 1rem;
 }
 
 .app img {
