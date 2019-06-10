@@ -3,6 +3,9 @@ import { hot } from 'react-hot-loader/root';
 // import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { checkURIforError, getTokenFromURI } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
+import { UserPlaylists } from './UserPlaylists';
+
+import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
 import { LoginLink } from './LoginLink';
 
@@ -109,13 +112,11 @@ class App extends React.Component {
     } = this.state;
     return (
       <div className="app">
-        <nav className="sidebar">
-          <h2>Sidebar</h2>
+        <Sidebar>
           { user ? <Welcome user={user} /> : <LoginLink message="Login to Spotify to get started." /> }
-        </nav>
-
+          {playlists && <UserPlaylists playlists={playlists} />}
+        </Sidebar>
         <Dashboard playlists={playlists} errorMessage={errorMessage} />
-
       </div>
     );
   }

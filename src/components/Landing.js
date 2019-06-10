@@ -1,5 +1,5 @@
 import React from 'react';
-import macaroon from '../assets/img/Macaroonicon.svg';
+import macaroon from '../assets/img/Macaroonicon.png';
 
 export const Landing = () => (
   <div className="logo">
