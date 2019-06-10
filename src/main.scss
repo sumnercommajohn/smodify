@@ -89,6 +89,7 @@ ul {
   background-color: black;
   color: #fbfbfb;
   padding: 1rem;
+  overflow: scroll;
 }
 
 .sidebar-component {
@@ -108,7 +109,7 @@ ul {
   width: 100%;
   font-size: 1.5rem;
   display: grid;
-  grid-template-columns: 3fr 2fr 1fr;
+  grid-template-columns: 3fr 2fr;
   align-items: stretch;
 }
 
