@@ -1,15 +1,16 @@
 import React from 'react';
 import { PlaylistItem } from './PlaylistItem';
+import { ErrorMessage } from './ErrorMessage';
 
 export const UserPlaylists = (props) => {
-  const { playlists } = props;
-  console.log(playlists.items);
+  const { playlists, errorMessage } = props;
   return (
     <div className="sidebar-component">
+      {errorMessage && <ErrorMessage message={errorMessage} />}
       <h3>Playlists</h3>
       <ul className="user-playlists">
-        {playlists.items.length
-          ? playlists.items.map(playlist => (
+        {playlists.length
+          ? playlists.map(playlist => (
             <PlaylistItem
               key={playlist.id}
               playlist={playlist}

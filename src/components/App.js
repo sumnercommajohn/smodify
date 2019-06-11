@@ -1,10 +1,8 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-// import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { checkURIforError, getTokenFromURI } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { UserPlaylists } from './UserPlaylists';
-
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
 import { LoginLink } from './LoginLink';
@@ -13,11 +11,17 @@ import { LoginLink } from './LoginLink';
 class App extends React.Component {
   state = {
     token: '',
-    user: '',
-    error: false,
-    errorMessage: '',
-    playlists: [],
-    nextPlaylistsEndpoint: null,
+    user: {
+      name: '',
+      error: false,
+      errorMessage: '',
+    },
+    playlists: {
+      items: [],
+      nextPlaylistsEndpoint: null,
+      error: false,
+      errorMessage: '',
+    },
   }
 
   componentDidMount() {
@@ -32,7 +36,7 @@ class App extends React.Component {
   }
 
   componentDidUpdate() {
-    const { token, nextPlaylistsEndpoint } = this.state;
+    const { token, playlists: { nextPlaylistsEndpoint } } = this.state;
     if (nextPlaylistsEndpoint) {
       this.getPlaylists(token, nextPlaylistsEndpoint);
     }
@@ -44,9 +48,15 @@ class App extends React.Component {
 
   setAuthError = (error) => {
     const errorMessage = error
-      ? 'Access denied by user'
+      ? 'Profile access revoked by user.'
       : '';
-    this.setState({ error, errorMessage });
+    this.setState(prevState => ({
+      ...prevState,
+      user: {
+        error,
+        errorMessage,
+      },
+    }));
   }
 
   getProfile = (token) => {
@@ -64,18 +74,22 @@ class App extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((userData) => {
-        const user = userData.display_name;
+        const name = userData.display_name;
         this.setState(prevState => ({
           ...prevState,
-          user,
-          error: false,
-          errorMessage: '',
+          user: {
+            name,
+            error: false,
+            errorMessage: '',
+          },
         }));
       })
       .catch((error) => {
         this.setState({
-          error: true,
-          errorMessage: error.message,
+          user: {
+            error: true,
+            errorMessage: error.message,
+          },
         });
       });
   }
@@ -97,16 +111,20 @@ class App extends React.Component {
       .then((playlistsObject) => {
         this.setState(prevState => ({
           ...prevState,
-          playlists: [...prevState.playlists, ...playlistsObject.items],
-          nextPlaylistsEndpoint: playlistsObject.next,
-          error: false,
-          errorMessage: '',
+          playlists: {
+            items: [...prevState.playlists.items, ...playlistsObject.items],
+            nextPlaylistsEndpoint: playlistsObject.next,
+            error: false,
+            errorMessage: '',
+          },
         }));
       })
       .catch((error) => {
         this.setState({
-          error: true,
-          errorMessage: error.message,
+          playlists: {
+            error: true,
+            errorMessage: error.message,
+          },
         });
       });
   }
@@ -114,17 +132,20 @@ class App extends React.Component {
 
   render() {
     const {
-      errorMessage,
       user,
       playlists,
     } = this.state;
     return (
       <div className="app">
         <Sidebar>
-          { user ? <Welcome user={user} /> : <LoginLink message="Login to Spotify to get started." /> }
-          {playlists && <UserPlaylists playlists={playlists} />}
+          { user.name
+            ? <Welcome user={user.name} />
+            : <LoginLink message="Login to Spotify to get started." />
+            }
+          { user.name
+            && <UserPlaylists playlists={playlists.items} errorMessage={playlists.errorMessage} /> }
         </Sidebar>
-        <Dashboard playlists={playlists} errorMessage={errorMessage} />
+        <Dashboard errorMessage={user.errorMessage} />
       </div>
     );
   }
