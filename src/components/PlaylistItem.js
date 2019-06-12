@@ -1,11 +1,16 @@
 import React from 'react';
 
 export const PlaylistItem = (props) => {
-  const { name, tracks } = props.playlist;
+  const { setCurrentPlaylist, playlist: { name, tracks } } = props;
   return (
-    <li className="playlist-item">
-      <span className="playlist-title">{name}</span>
-      <span className="tracks">{tracks.total} Songs</span>
+    <li>
+      <button type="button" className="playlist-button" onClick={() => setCurrentPlaylist(props.playlist)}>
+        <div className="playlist-item">
+          <span className="playlist-title">{name}</span>
+          <span className="tracks">{tracks.total} Songs</span>
+        </div>
+      </button>
     </li>
+
   );
 };
