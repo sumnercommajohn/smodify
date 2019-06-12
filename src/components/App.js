@@ -35,8 +35,6 @@ class App extends React.Component {
     }
   }
 
-  // Spotify returns large arrays of items grouped into slices, each wrapped in a paging object,
-  // so componentDidUpdate checks for a link another chunk, fetches it, adds it to items state.
   componentDidUpdate() {
     const { token, playlists: { nextPlaylistsEndpoint } } = this.state;
     if (nextPlaylistsEndpoint) {
@@ -133,7 +131,7 @@ class App extends React.Component {
 
   sortPlaylists = (sortBy, sortDescending) => {
     const { items } = this.state.playlists;
-    const playlistsMap = [...items].map((playlist, i) => ({
+    const playlistsMap = items.map((playlist, i) => ({
       index: i,
       name: playlist.name.toLowerCase(),
       total: playlist.tracks.total,
