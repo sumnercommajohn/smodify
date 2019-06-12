@@ -5,7 +5,9 @@ import SortButton from './SortButton';
 
 
 export const UserPlaylists = (props) => {
-  const { playlists, errorMessage, sortPlaylists } = props;
+  const {
+    playlists, errorMessage, sortPlaylists, setCurrentPlaylist,
+  } = props;
   return (
     <div className="sidebar-component">
       {errorMessage && <ErrorMessage message={errorMessage} />}
@@ -20,6 +22,7 @@ export const UserPlaylists = (props) => {
             <PlaylistItem
               key={playlist.id}
               playlist={playlist}
+              setCurrentPlaylist={setCurrentPlaylist}
             />
           ))
           : <p>Loading...</p>}

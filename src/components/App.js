@@ -13,6 +13,7 @@ class App extends React.Component {
     token: '',
     user: {
       name: '',
+      id: '',
       error: false,
       errorMessage: '',
     },
@@ -21,6 +22,8 @@ class App extends React.Component {
       nextPlaylistsEndpoint: null,
       error: false,
       errorMessage: '',
+    },
+    currentPlaylist: {
     },
   }
 
@@ -74,11 +77,12 @@ class App extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((userData) => {
-        const name = userData.display_name;
+        const { id, display_name: name } = userData;
         this.setState(prevState => ({
           ...prevState,
           user: {
             name,
+            id,
             error: false,
             errorMessage: '',
           },
@@ -157,6 +161,11 @@ class App extends React.Component {
     }));
   };
 
+  setCurrentPlaylist = (playlist) => {
+    const selectedPlaylist = { ...playlist };
+    this.setState({ currentPlaylist: selectedPlaylist });
+  };
+
 
   render() {
     const {
@@ -176,6 +185,7 @@ class App extends React.Component {
               playlists={playlists.items}
               errorMessage={playlists.errorMessage}
               sortPlaylists={this.sortPlaylists}
+              setCurrentPlaylist={this.setCurrentPlaylist}
             />
             )
           }
