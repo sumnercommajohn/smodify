@@ -35,6 +35,8 @@ class App extends React.Component {
     }
   }
 
+  // Spotify returns large arrays of items grouped into slices, each wrapped in a paging object,
+  // so componentDidUpdate checks for a link another chunk, fetches it, adds it to items state.
   componentDidUpdate() {
     const { token, playlists: { nextPlaylistsEndpoint } } = this.state;
     if (nextPlaylistsEndpoint) {
@@ -129,6 +131,34 @@ class App extends React.Component {
       });
   }
 
+  sortPlaylists = (sortBy, sortDescending) => {
+    const { items } = this.state.playlists;
+    const playlistsMap = [...items].map((playlist, i) => ({
+      index: i,
+      name: playlist.name.toLowerCase(),
+      total: playlist.tracks.total,
+    }));
+    playlistsMap.sort((a, b) => {
+      if (a[`${sortBy}`] > b[`${sortBy}`]) {
+        return 1;
+      }
+      if (a[`${sortBy}`] < b[`${sortBy}`]) {
+        return -1;
+      }
+      return 0;
+    });
+    if (sortDescending) {
+      playlistsMap.reverse();
+    }
+    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
+    this.setState(prevState => ({
+      ...prevState,
+      playlists: {
+        items: [...playlistsSorted],
+      },
+    }));
+  };
+
 
   render() {
     const {
@@ -143,7 +173,14 @@ class App extends React.Component {
             : <LoginLink message="Login to Spotify to get started." />
             }
           { user.name
-            && <UserPlaylists playlists={playlists.items} errorMessage={playlists.errorMessage} /> }
+            && (
+            <UserPlaylists
+              playlists={playlists.items}
+              errorMessage={playlists.errorMessage}
+              sortPlaylists={this.sortPlaylists}
+            />
+            )
+          }
         </Sidebar>
         <Dashboard errorMessage={user.errorMessage} />
       </div>

@@ -96,7 +96,7 @@ ul {
   margin-bottom: 2rem;
 }
 
-.user-playlists {
+.user-playlists{
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
@@ -105,7 +105,7 @@ ul {
   font-weight: 500;
 }
 
-.playlist-item {
+.playlist-item, .playlist-headers {
   width: 100%;
   font-size: 1.5rem;
   display: grid;
