@@ -106,10 +106,8 @@ ul {
 .playlist-button {
   width: 100%;
   text-align: left;
-  border-top: none;
-  border-left: none;
-  border-right: 1px solid gray;
-  border-bottom: 1px solid gray; 
+  border: unset;
+  border-bottom: 1px solid #222222;
   background: none;
   color: #fbfbfb;
   font-weight: 600;
@@ -123,7 +121,7 @@ ul {
   padding-right: .5rem;
 } 
 
-.playlist-item, .playlist-headers {
+.playlist-item, .list-headers {
   width: 100%;
   font-size: 1.5rem;
   display: grid;
