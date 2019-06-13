@@ -13,7 +13,7 @@ export const UserPlaylists = (props) => {
       {errorMessage && <ErrorMessage message={errorMessage} />}
       <h3>Playlists</h3>
       <ul className="user-playlists">
-        <div className="playlist-headers">
+        <div className="list-headers">
           <SortButton sortFunction={sortPlaylists} sortBy="name">Title</SortButton>
           <SortButton sortFunction={sortPlaylists} sortBy="total">Tracks</SortButton>
         </div>
