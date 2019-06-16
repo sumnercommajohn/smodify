@@ -13,6 +13,7 @@ class App extends React.Component {
     token: '',
     user: {
       name: '',
+      id: '',
       error: false,
       errorMessage: '',
     },
@@ -30,15 +31,15 @@ class App extends React.Component {
     this.setAuthError(authError);
     if (token) {
       this.setToken(token);
-      this.getProfile(token);
-      this.getPlaylists(token);
+      this.fetchProfile(token);
+      this.fetchPlaylists(token);
     }
   }
 
   componentDidUpdate() {
     const { token, playlists: { nextPlaylistsEndpoint } } = this.state;
     if (nextPlaylistsEndpoint) {
-      this.getPlaylists(token, nextPlaylistsEndpoint);
+      this.fetchPlaylists(token, nextPlaylistsEndpoint);
     }
   }
 
@@ -59,7 +60,7 @@ class App extends React.Component {
     }));
   }
 
-  getProfile = (token) => {
+  fetchProfile = (token) => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
 
@@ -74,11 +75,12 @@ class App extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((userData) => {
-        const name = userData.display_name;
+        const { id, display_name: name } = userData;
         this.setState(prevState => ({
           ...prevState,
           user: {
             name,
+            id,
             error: false,
             errorMessage: '',
           },
@@ -94,7 +96,7 @@ class App extends React.Component {
       });
   }
 
-  getPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
+  fetchPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
 
@@ -176,11 +178,14 @@ class App extends React.Component {
               playlists={playlists.items}
               errorMessage={playlists.errorMessage}
               sortPlaylists={this.sortPlaylists}
+              setCurrentPlaylist={this.setCurrentPlaylist}
             />
             )
           }
         </Sidebar>
+
         <Dashboard errorMessage={user.errorMessage} />
+
       </div>
     );
   }

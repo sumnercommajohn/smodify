@@ -15,7 +15,11 @@ class SortButton extends React.Component {
   }
 
   render() {
-    return (<button type="button" onClick={this.toggleSort}>{this.props.children}</button>);
+    return (
+      <button type="button" className="playlist-button" onClick={this.toggleSort}>
+        {this.props.children} {this.state.sortDescending ? '▼' : '▲'}
+      </button>
+    );
   }
 }
 
