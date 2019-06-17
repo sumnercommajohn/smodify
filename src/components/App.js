@@ -99,6 +99,7 @@ class App extends React.Component {
   fetchPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
+    console.log('Hi');
 
     fetch(endpoint, {
       method: 'GET',
