@@ -37,9 +37,10 @@ class App extends React.Component {
     const token = getTokenFromURI();
     this.setAuthError(authError);
     if (token) {
+      console.log('setting token...');
       this.setToken(token);
+      console.log('fetching profile...');
       this.fetchProfile(token);
-      this.fetchPlaylists(token);
     }
   }
 
@@ -131,6 +132,7 @@ class App extends React.Component {
   }
 
   sortPlaylists = (sortBy, sortDescending) => {
+    console.log('sorting playlists...');
     const { items } = this.state.playlists;
     const playlistsMap = items.map((playlist, i) => ({
       index: i,
@@ -162,7 +164,10 @@ class App extends React.Component {
     const { currentPlaylist, token } = this.state;
     const selectedPlaylist = { ...playlist };
     if (selectedPlaylist.id !== currentPlaylist.id) {
+      console.log(`setting ${selectedPlaylist.name} as CurrentPlaylist...`);
       this.setState({ currentPlaylist: selectedPlaylist });
+      console.log(`fetching ${selectedPlaylist.name}'s tracks`);
+      this.fetchCurrentPlaylistTracks(token, selectedPlaylist.tracks.href);
     }
   };
 
