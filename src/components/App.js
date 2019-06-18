@@ -2,11 +2,11 @@ import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import { checkURIforError, getTokenFromURI } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
-import { UserPlaylists } from './UserPlaylists';
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
-import CurrentPlaylist from './CurrentPlaylist';
 import { LoginLink } from './LoginLink';
+import UserPlaylists from './UserPlaylists';
+import CurrentPlaylist from './CurrentPlaylist';
 
 
 class App extends React.Component {
@@ -25,6 +25,10 @@ class App extends React.Component {
       errorMessage: '',
     },
     currentPlaylist: {
+      name: '',
+      tracks: {
+        items: [],
+      },
     },
   }
 
@@ -39,12 +43,6 @@ class App extends React.Component {
     }
   }
 
-  componentDidUpdate() {
-    const { token, playlists: { nextPlaylistsEndpoint } } = this.state;
-    if (nextPlaylistsEndpoint) {
-      this.fetchPlaylists(token, nextPlaylistsEndpoint);
-    }
-  }
 
   setToken = (token) => {
     this.setState({ token });
@@ -54,13 +52,12 @@ class App extends React.Component {
     const errorMessage = error
       ? 'Profile access revoked by user.'
       : '';
-    this.setState(prevState => ({
-      ...prevState,
+    this.setState({
       user: {
         error,
         errorMessage,
       },
-    }));
+    });
   }
 
   fetchProfile = (token) => {
@@ -79,15 +76,14 @@ class App extends React.Component {
       })
       .then((userData) => {
         const { id, display_name: name } = userData;
-        this.setState(prevState => ({
-          ...prevState,
+        this.setState({
           user: {
             name,
             id,
             error: false,
             errorMessage: '',
           },
-        }));
+        });
       })
       .catch((error) => {
         this.setState({
@@ -99,7 +95,7 @@ class App extends React.Component {
       });
   }
 
-  fetchPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
+  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
 
@@ -163,15 +159,62 @@ class App extends React.Component {
   };
 
   setCurrentPlaylist = (playlist) => {
+    const { currentPlaylist, token } = this.state;
     const selectedPlaylist = { ...playlist };
-    this.setState({ currentPlaylist: selectedPlaylist });
+    if (selectedPlaylist.id !== currentPlaylist.id) {
+      this.setState({ currentPlaylist: selectedPlaylist });
+    }
   };
 
+  fetchCurrentPlaylistTracks = (token, endpoint) => {
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
+
+    fetch(endpoint, {
+      method: 'GET',
+      headers: myHeaders,
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw Error(`Request rejected with status ${response.status}`);
+      })
+      .then((tracks) => {
+        this.setState((prevState) => {
+          const existingTracks = prevState.currentPlaylist.tracks.items || [];
+          const fetchedTracks = tracks.items;
+          return {
+            ...prevState,
+            currentPlaylist: {
+              ...prevState.currentPlaylist,
+              tracks: {
+                ...tracks,
+                items: [...existingTracks, ...fetchedTracks],
+              },
+              error: false,
+              errorMessage: '',
+            },
+          };
+        });
+      })
+      .catch((error) => {
+        this.setState({
+          currentPlaylist: {
+            error: true,
+            errorMessage: error.message,
+          },
+        });
+      });
+  };
 
   render() {
+    console.log('App render');
     const {
       user,
+      token,
       playlists,
+      currentPlaylist,
     } = this.state;
     return (
       <div className="app">
@@ -183,16 +226,27 @@ class App extends React.Component {
           { user.name
             && (
             <UserPlaylists
-              playlists={playlists.items}
+              token={token}
+              playlists={playlists}
               errorMessage={playlists.errorMessage}
+              fetchUserPlaylists={this.fetchUserPlaylists}
               sortPlaylists={this.sortPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
             />
             )
           }
         </Sidebar>
+        { currentPlaylist.name
+          ? (
+            <CurrentPlaylist
+              playlist={currentPlaylist}
+              fetchCurrentPlaylistTracks={this.fetchCurrentPlaylistTracks}
+              token={token}
+            />
+          )
+          : <Dashboard errorMessage={user.errorMessage} />
+        }
 
-        <Dashboard errorMessage={user.errorMessage} />
 
       </div>
     );
