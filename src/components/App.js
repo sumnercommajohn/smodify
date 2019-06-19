@@ -18,17 +18,9 @@ class App extends React.Component {
       error: false,
       errorMessage: '',
     },
-    playlists: {
-      items: [],
-      nextPlaylistsEndpoint: null,
-      error: false,
-      errorMessage: '',
-    },
     currentPlaylist: {
       name: '',
-      tracks: {
-        items: [],
-      },
+
     },
   }
 
@@ -96,69 +88,6 @@ class App extends React.Component {
       });
   }
 
-  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-
-    fetch(endpoint, {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((playlistsObject) => {
-        this.setState(prevState => ({
-          ...prevState,
-          playlists: {
-            items: [...prevState.playlists.items, ...playlistsObject.items],
-            nextPlaylistsEndpoint: playlistsObject.next,
-            error: false,
-            errorMessage: '',
-          },
-        }));
-      })
-      .catch((error) => {
-        this.setState({
-          playlists: {
-            error: true,
-            errorMessage: error.message,
-          },
-        });
-      });
-  }
-
-  sortPlaylists = (sortBy, sortDescending) => {
-    console.log('sorting playlists...');
-    const { items } = this.state.playlists;
-    const playlistsMap = items.map((playlist, i) => ({
-      index: i,
-      name: playlist.name.toLowerCase(),
-      total: playlist.tracks.total,
-    }));
-    playlistsMap.sort((a, b) => {
-      if (a[`${sortBy}`] > b[`${sortBy}`]) {
-        return 1;
-      }
-      if (a[`${sortBy}`] < b[`${sortBy}`]) {
-        return -1;
-      }
-      return 0;
-    });
-    if (sortDescending) {
-      playlistsMap.reverse();
-    }
-    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
-    this.setState(prevState => ({
-      ...prevState,
-      playlists: {
-        items: [...playlistsSorted],
-      },
-    }));
-  };
 
   setCurrentPlaylist = (playlist) => {
     const { currentPlaylist, token } = this.state;
@@ -167,58 +96,15 @@ class App extends React.Component {
       console.log(`setting ${selectedPlaylist.name} as CurrentPlaylist...`);
       this.setState({ currentPlaylist: selectedPlaylist });
       console.log(`fetching ${selectedPlaylist.name}'s tracks`);
-      this.fetchCurrentPlaylistTracks(token, selectedPlaylist.tracks.href);
     }
   };
 
-  fetchCurrentPlaylistTracks = (token, endpoint) => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-
-    fetch(endpoint, {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((tracks) => {
-        this.setState((prevState) => {
-          const existingTracks = prevState.currentPlaylist.tracks.items || [];
-          const fetchedTracks = tracks.items;
-          return {
-            ...prevState,
-            currentPlaylist: {
-              ...prevState.currentPlaylist,
-              tracks: {
-                ...tracks,
-                items: [...existingTracks, ...fetchedTracks],
-              },
-              error: false,
-              errorMessage: '',
-            },
-          };
-        });
-      })
-      .catch((error) => {
-        this.setState({
-          currentPlaylist: {
-            error: true,
-            errorMessage: error.message,
-          },
-        });
-      });
-  };
 
   render() {
     console.log('App render');
     const {
       user,
       token,
-      playlists,
       currentPlaylist,
     } = this.state;
     return (
@@ -232,10 +118,6 @@ class App extends React.Component {
             && (
             <UserPlaylists
               token={token}
-              playlists={playlists}
-              errorMessage={playlists.errorMessage}
-              fetchUserPlaylists={this.fetchUserPlaylists}
-              sortPlaylists={this.sortPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
             />
             )
@@ -244,6 +126,7 @@ class App extends React.Component {
         { currentPlaylist.name
           ? (
             <CurrentPlaylist
+              key={currentPlaylist.id}
               playlist={currentPlaylist}
               fetchCurrentPlaylistTracks={this.fetchCurrentPlaylistTracks}
               token={token}
