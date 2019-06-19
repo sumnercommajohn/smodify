@@ -1,17 +1,30 @@
 import React from 'react';
 import { TrackItem } from './TrackItem';
+import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
+  state = {
+    error: false,
+    errorMessage: '',
+    tracks: {
+      items: [],
+    },
+    nextTracksEndpoint: null,
+  }
+
   componentDidMount() {
+    const { token, playlist } = this.props;
     console.log(`Mounting ${this.props.playlist.name}`);
+    this.fetchCurrentPlaylistTracks(token, playlist.tracks.href);
   }
 
   componentDidUpdate() {
-    const { token, playlist } = this.props;
+    const { token } = this.props;
+    const { nextTracksEndpoint } = this.state;
 
-    if (playlist.tracks.next) {
+    if (nextTracksEndpoint) {
       console.log('fetching next batch....');
-      this.props.fetchCurrentPlaylistTracks(token, playlist.tracks.next);
+      this.fetchCurrentPlaylistTracks(token, nextTracksEndpoint);
     }
   }
 
@@ -19,8 +32,47 @@ class CurrentPlaylist extends React.Component {
     console.log(`Unmounting ${this.props.playlist.name}`);
   }
 
+  fetchCurrentPlaylistTracks = (token, endpoint) => {
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
+
+    fetch(endpoint, {
+      method: 'GET',
+      headers: myHeaders,
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw Error(`Request rejected with status ${response.status}`);
+      })
+      .then((tracks) => {
+        this.setState((prevState) => {
+          const existingTracks = prevState.tracks.items || [];
+          const fetchedTracks = tracks.items;
+          return {
+            error: false,
+            errorMessage: '',
+            tracks: {
+              items: [...existingTracks, ...fetchedTracks],
+            },
+            nextTracksEndpoint: tracks.next,
+          };
+        });
+      })
+      .catch((error) => {
+        this.setState({
+          currentPlaylist: {
+            error: true,
+            errorMessage: error.message,
+          },
+        });
+      });
+  };
+
   render() {
-    const { name, tracks: { items } } = this.props.playlist;
+    const { name } = this.props.playlist;
+    const { items } = this.state.tracks;
     console.log(`${name} render`);
     return (
       <main>
