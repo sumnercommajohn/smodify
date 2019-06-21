@@ -13,6 +13,14 @@ export const getAuthURL = (showDialog = false) => {
   return authURL;
 };
 
+export const saveTokenToLocal = (token) => {
+  const timeStamp = Date.now();
+  localStorage.setItem(
+    'oldToken',
+    JSON.stringify({ token, timeStamp }),
+  );
+};
+
 export const getTokenFromURI = () => {
   const hash = window.location.hash
     .substring(1)
@@ -25,8 +33,17 @@ export const getTokenFromURI = () => {
       return initial;
     }, {});
   window.location.hash = '';
-
+  if (hash.access_token) { saveTokenToLocal(hash.access_token); }
   return hash.access_token || '';
+};
+
+
+export const getTokenFromLocal = () => {
+  const oldToken = JSON.parse(localStorage.getItem('oldToken'));
+  if (Date.now() - oldToken.timeStamp < 3599000) {
+    return oldToken.token;
+  }
+  return false;
 };
 
 export const checkURIforError = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { checkURIforError, getTokenFromURI } from '../config/authConfig';
+import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
@@ -25,13 +25,14 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    let token = getTokenFromURI();
+    if (!token) {
+      token = getTokenFromLocal();
+    }
     const authError = checkURIforError();
-    const token = getTokenFromURI();
     this.setAuthError(authError);
     if (token) {
-      console.log('setting token...');
       this.setToken(token);
-      console.log('fetching profile...');
       this.fetchProfile(token);
     }
   }
@@ -93,15 +94,12 @@ class App extends React.Component {
     const { currentPlaylist, token } = this.state;
     const selectedPlaylist = { ...playlist };
     if (selectedPlaylist.id !== currentPlaylist.id) {
-      console.log(`setting ${selectedPlaylist.name} as CurrentPlaylist...`);
       this.setState({ currentPlaylist: selectedPlaylist });
-      console.log(`fetching ${selectedPlaylist.name}'s tracks`);
     }
   };
 
 
   render() {
-    console.log('App render');
     const {
       user,
       token,

@@ -14,7 +14,6 @@ class CurrentPlaylist extends React.Component {
 
   componentDidMount() {
     const { token, playlist } = this.props;
-    console.log(`Mounting ${this.props.playlist.name}`);
     this.fetchCurrentPlaylistTracks(token, playlist.tracks.href);
   }
 
@@ -23,14 +22,10 @@ class CurrentPlaylist extends React.Component {
     const { nextTracksEndpoint } = this.state;
 
     if (nextTracksEndpoint) {
-      console.log('fetching next batch....');
       this.fetchCurrentPlaylistTracks(token, nextTracksEndpoint);
     }
   }
 
-  componentWillUnmount() {
-    console.log(`Unmounting ${this.props.playlist.name}`);
-  }
 
   fetchCurrentPlaylistTracks = (token, endpoint) => {
     const myHeaders = new Headers();
@@ -76,7 +71,6 @@ class CurrentPlaylist extends React.Component {
     } = this.props.playlist;
     const { items } = this.state.tracks;
     const imageSrc = images[0].url;
-    console.log(`${name} render`);
     return (
       <main className="current-playlist">
         <section className="current-playlist-header">
