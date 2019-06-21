@@ -71,14 +71,24 @@ class CurrentPlaylist extends React.Component {
   };
 
   render() {
-    const { name } = this.props.playlist;
+    const {
+      name, images, owner: { display_name: ownerName }, tracks: { total },
+    } = this.props.playlist;
     const { items } = this.state.tracks;
+    const imageSrc = images[0].url;
     console.log(`${name} render`);
     return (
-      <main>
-        <h3 className="title"> {name} </h3>
+      <main className="current-playlist">
+        <section className="current-playlist-header">
+          <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
+          <div className="current-playlist-details">
+            <h3 className="current-playlist-title"> {name} </h3>
+            <h4>By {ownerName}</h4>
+            <span>{total} tracks</span>
+          </div>
+        </section>
 
-        <ul className="single-playlist">
+        <ul className="current-playlist-tracks">
           {items
               && items.map(trackItem => (
                 <TrackItem

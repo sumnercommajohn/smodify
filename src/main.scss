@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(0, 0, 0, 0.05);
   background-image: url("./assets/img/3contour.svg");
   min-height: calc(100vh - 100px);
   margin: 0;
@@ -59,7 +59,7 @@ ul {
 }
 
 .app {
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 3fr;
   height: 100vh;
   display: grid;
 }
@@ -95,11 +95,10 @@ ul {
   margin-bottom: 2rem;
 }
 
-.user-playlists{
+.user-playlists {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  justify-content: right;
   font-weight: 500;
 }
 
@@ -112,21 +111,79 @@ ul {
   color: #fbfbfb;
   font-weight: 600;
   font-size: 1.5rem;
-  padding: 1rem;
-  
-  
+  padding: 1rem 0;
 }
 
 .playlist-button span {
   padding-right: .5rem;
 } 
 
-.playlist-item, .list-headers {
+.playlist-item, .list-headers{
   width: 100%;
   font-size: 1.5rem;
   display: grid;
   grid-template-columns: 3fr 2fr;
-  align-items: stretch;
+
+}
+
+.current-playlist{
+  padding: 2rem;
+}
+
+.current-playlist-header {
+  display: grid;
+  grid-template-columns: 1fr 7fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.current-playlist-image {
+  width: 200px; 
+  
+}
+
+.current-playlist-title {
+  font-size: 4rem;
+  line-height: 4rem;
+  
+}
+
+.current-playlist-tracks {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: right;
+  row-gap: 2rem;
+}
+
+
+.playlist-track {
+  width: 100%;
+  font-size: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 23fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.song-details {
+  line-height: 1.8rem;
+}
+
+.song-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  width: 100%;
+  display: inline-block;
+  word-break: break-all;
+}
+
+.song-album {
+  font-style: italic;
+}
+
+.checkbox {
+  margin: 0 auto;
+  justify-self: left;
 }
 
 .app img {
