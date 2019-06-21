@@ -15,7 +15,6 @@ class UserPlaylists extends React.Component {
 
   componentDidMount() {
     const { token } = this.props;
-    console.log('fetching Playlists...');
     if (!this.state.items.length) {
       this.fetchUserPlaylists(token);
     }
@@ -25,13 +24,8 @@ class UserPlaylists extends React.Component {
     const { token } = this.props;
     const { nextPlaylistsEndpoint } = this.state;
     if (nextPlaylistsEndpoint) {
-      console.log('fetching more playlists...');
       this.fetchUserPlaylists(token, nextPlaylistsEndpoint);
     }
-  }
-
-  componentWillUnmount() {
-    console.log('UserPlaylists unmounting!');
   }
 
 
@@ -72,7 +66,6 @@ class UserPlaylists extends React.Component {
   }
 
   sortPlaylists = (sortBy, sortDescending = false) => {
-    console.log('sorting playlists...');
     const { items } = this.state;
     const playlistsMap = items.map((playlist, i) => ({
       index: i,
@@ -98,7 +91,6 @@ class UserPlaylists extends React.Component {
   };
 
   render() {
-    console.log('UserPlaylists render');
     const {
       errorMessage,
       setCurrentPlaylist,
