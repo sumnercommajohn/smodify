@@ -45,6 +45,7 @@ class CurrentPlaylist extends React.Component {
         this.setState((prevState) => {
           const existingTracks = prevState.tracks.items || [];
           const fetchedTracks = tracks.items;
+          fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
           return {
             error: false,
             errorMessage: '',
@@ -69,7 +70,7 @@ class CurrentPlaylist extends React.Component {
     const {
       name, images, owner: { display_name: ownerName }, tracks: { total },
     } = this.props.playlist;
-    const { items } = this.state.tracks;
+    const { errorMessage, tracks: { items } } = this.state;
     const imageSrc = images[0].url;
     return (
       <main className="current-playlist">
@@ -81,13 +82,13 @@ class CurrentPlaylist extends React.Component {
             <span>{total} tracks</span>
           </div>
         </section>
-
+        {errorMessage && <ErrorMessage message={errorMessage} />}
         <ul className="current-playlist-tracks">
           {items
               && items.map(trackItem => (
                 <TrackItem
-                  key={trackItem.track.id + trackItem.added_at}
-                  id={trackItem.track.id + trackItem.added_at}
+                  key={trackItem.key}
+                  id={trackItem.key}
                   album={trackItem.track.album}
                   artists={trackItem.track.artists}
                   name={trackItem.track.name}

@@ -20,27 +20,22 @@ class App extends React.Component {
     },
     currentPlaylist: {
       name: '',
-
     },
   }
 
   componentDidMount() {
     let token = getTokenFromURI();
+    const authError = checkURIforError();
     if (!token) {
       token = getTokenFromLocal();
     }
-    const authError = checkURIforError();
     this.setAuthError(authError);
     if (token) {
-      this.setToken(token);
+      this.setState({ token });
       this.fetchProfile(token);
     }
   }
 
-
-  setToken = (token) => {
-    this.setState({ token });
-  }
 
   setAuthError = (error) => {
     const errorMessage = error
@@ -91,7 +86,7 @@ class App extends React.Component {
 
 
   setCurrentPlaylist = (playlist) => {
-    const { currentPlaylist, token } = this.state;
+    const { currentPlaylist } = this.state;
     const selectedPlaylist = { ...playlist };
     if (selectedPlaylist.id !== currentPlaylist.id) {
       this.setState({ currentPlaylist: selectedPlaylist });
