@@ -40,7 +40,7 @@ export const getTokenFromURI = () => {
 
 export const getTokenFromLocal = () => {
   const oldToken = JSON.parse(localStorage.getItem('oldToken'));
-  if (Date.now() - oldToken.timeStamp < 3599000) {
+  if (oldToken && Date.now() - oldToken.timeStamp < 3599000) {
     return oldToken.token;
   }
   return false;
