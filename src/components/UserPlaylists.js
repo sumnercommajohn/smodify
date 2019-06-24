@@ -44,23 +44,17 @@ class UserPlaylists extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((playlistsObject) => {
-        this.setState((prevState) => {
-          const existingPlaylists = refresh ? [] : prevState.items;
-          const fetchedPlaylists = playlistsObject.items;
-          return {
-            items: [...prevState.items, ...playlistsObject.items],
-            nextPlaylistsEndpoint: playlistsObject.next,
-            error: false,
-            errorMessage: '',
-          };
-        });
+        this.setState(prevState => ({
+          items: [...prevState.items, ...playlistsObject.items],
+          nextPlaylistsEndpoint: playlistsObject.next,
+          error: false,
+          errorMessage: '',
+        }));
       })
       .catch((error) => {
         this.setState({
-
           error: true,
           errorMessage: error.message,
-
         });
       });
   }

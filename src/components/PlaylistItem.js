@@ -5,7 +5,7 @@ export const PlaylistItem = (props) => {
   return (
     <li>
       <button type="button" className="playlist-button" onClick={() => setCurrentPlaylist(props.playlist)}>
-        <div className="playlist-item">
+        <div className="user-playlist-item">
           <span className="playlist-title">{name}</span>
           <span className="tracks">{tracks.total} Songs</span>
         </div>

@@ -19,10 +19,9 @@ html {
 
 body {
   background-color: rgba(0, 0, 0, 0.05);
-  background-image: url("./assets/img/3contour.svg");
+  background-image: url("./assets/img/3contour.svg"), linear-gradient(to right, rgba(0, 0, 0, 0.021), rgba(17, 17, 17, 0.027));
   min-height: calc(100vh - 100px);
   margin: 0;
-
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -118,7 +117,7 @@ ul {
   padding-right: .5rem;
 } 
 
-.playlist-item, .list-headers{
+.user-playlist-item, .list-headers{
   width: 100%;
   font-size: 1.5rem;
   display: grid;
@@ -152,7 +151,7 @@ ul {
   display: grid;
   grid-template-columns: 1fr;
   justify-content: right;
-  row-gap: 2rem;
+  row-gap: 1.5rem;
 }
 
 
@@ -161,8 +160,11 @@ ul {
   font-size: 1.5rem;
   display: grid;
   grid-template-columns: 1fr 23fr;
-  gap: 2rem;
+  padding: 1rem;
+  gap: 1rem;
   align-items: center;
+  background-color: #fbfbfb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.057), 0 -1px 2px rgba(0, 0, 0, 0.064);
 }
 
 .song-details {
@@ -183,7 +185,7 @@ ul {
 
 .checkbox {
   margin: 0 auto;
-  justify-self: left;
+  justify-self: center;
 }
 
 .app img {
