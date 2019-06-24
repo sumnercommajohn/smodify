@@ -6,11 +6,10 @@ html {
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: var(--superDark);
   text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.055);
-  font-size: 12px;
+  font-size: 10px;
 }
 
 /*
-  WAT IS THIS?! : border-box; from our <html> selector
   Apparently this is a bit better than applying box-sizing: border-box; directly to the * selector
 */
 *,
@@ -27,7 +26,7 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  font-size: 1.7rem;
+  font-size: 2rem;
 }
 
 p {
@@ -46,7 +45,7 @@ h6 {
 
 a {
   text-decoration: none;
-  color: var(--superLightBlue);
+  color: cornflowerblue;
   font-weight: bold;
 }
 
@@ -68,5 +67,22 @@ ul {
 }
 
 .app img {
-  max-width: 400px;
+  max-width: 250px;
+}
+
+.warning {
+  color: indianred;
+  padding: 20px 0;
+}
+
+.warning p {
+  margin: 0;
+}
+
+.text-small {
+  font-size: 1.5rem;
+}
+
+.text-bold {
+  font-weight: bold;
 }
