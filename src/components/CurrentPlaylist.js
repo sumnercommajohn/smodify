@@ -112,7 +112,7 @@ class CurrentPlaylist extends React.Component {
               && items.map(trackItem => (
                 <TrackItem
                   key={trackItem.key}
-                  id={trackItem.key}
+                  uid={trackItem.key}
                   album={trackItem.track.album}
                   artists={trackItem.track.artists}
                   name={trackItem.track.name}
