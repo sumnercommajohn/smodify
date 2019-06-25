@@ -21,6 +21,12 @@ class App extends React.Component {
     currentPlaylist: {
       name: '',
     },
+    userPlaylists: {
+      items: [],
+      nextPlaylistsEndpoint: null,
+      error: false,
+      errorMessage: '',
+    },
   }
 
   componentDidMount() {
@@ -84,6 +90,66 @@ class App extends React.Component {
       });
   }
 
+  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists', refresh = false) => {
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
+
+    fetch(endpoint, {
+      method: 'GET',
+      headers: myHeaders,
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw Error(`Request rejected with status ${response.status}`);
+      })
+      .then((playlistsObject) => {
+        this.setState(prevState => ({
+          userPlaylists: {
+            items: [...prevState.userPlaylists.items, ...playlistsObject.items],
+            nextPlaylistsEndpoint: playlistsObject.next,
+            error: false,
+            errorMessage: '',
+          },
+        }));
+      })
+      .catch((error) => {
+        this.setState({
+          userPlaylists: {
+            error: true,
+            errorMessage: error.message,
+          },
+        });
+      });
+  }
+
+  sortPlaylists = (sortBy, sortDescending = false) => {
+    const { items } = this.state.userPlaylists;
+    const playlistsMap = items.map((playlist, i) => ({
+      index: i,
+      name: playlist.name.toLowerCase(),
+      total: playlist.tracks.total,
+    }));
+    playlistsMap.sort((a, b) => {
+      if (a[`${sortBy}`] > b[`${sortBy}`]) {
+        return 1;
+      }
+      if (a[`${sortBy}`] < b[`${sortBy}`]) {
+        return -1;
+      }
+      return 0;
+    });
+    if (sortDescending) {
+      playlistsMap.reverse();
+    }
+    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
+    this.setState({
+      userPlaylists: {
+        items: [...playlistsSorted],
+      },
+    });
+  };
 
   setCurrentPlaylist = (playlist) => {
     const { currentPlaylist } = this.state;
@@ -99,6 +165,7 @@ class App extends React.Component {
       user,
       token,
       currentPlaylist,
+      userPlaylists,
     } = this.state;
     return (
       <div className="app">
@@ -111,7 +178,10 @@ class App extends React.Component {
             && (
             <UserPlaylists
               token={token}
+              userPlaylists={userPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              fetchUserPlaylists={this.fetchUserPlaylists}
+              sortPlaylists={this.sortPlaylists}
             />
             )
           }
