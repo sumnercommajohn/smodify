@@ -13,7 +13,16 @@ class UserPlaylists extends React.Component {
   }
 
   componentDidUpdate() {
-    const { token, fetchUserPlaylists, userPlaylists: { nextPlaylistsEndpoint } } = this.props;
+    const {
+      token,
+      fetchUserPlaylists,
+      userPlaylists: { nextPlaylistsEndpoint, needsRefresh },
+    } = this.props;
+
+    if (needsRefresh) {
+      fetchUserPlaylists(token);
+    }
+
     if (nextPlaylistsEndpoint) {
       fetchUserPlaylists(token, nextPlaylistsEndpoint);
     }

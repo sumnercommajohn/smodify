@@ -26,6 +26,7 @@ class App extends React.Component {
       nextPlaylistsEndpoint: null,
       error: false,
       errorMessage: '',
+      needsRefresh: false,
     },
   }
 
@@ -90,7 +91,7 @@ class App extends React.Component {
       });
   }
 
-  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists', refresh = false) => {
+  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
 
@@ -105,14 +106,22 @@ class App extends React.Component {
         throw Error(`Request rejected with status ${response.status}`);
       })
       .then((playlistsObject) => {
-        this.setState(prevState => ({
-          userPlaylists: {
-            items: [...prevState.userPlaylists.items, ...playlistsObject.items],
-            nextPlaylistsEndpoint: playlistsObject.next,
-            error: false,
-            errorMessage: '',
-          },
-        }));
+        const { needsRefresh } = this.state.userPlaylists;
+        this.setState((prevState) => {
+          const existingItems = needsRefresh
+            ? []
+            : prevState.userPlaylists.items;
+          return {
+            userPlaylists: {
+              items: [...existingItems, ...playlistsObject.items],
+              nextPlaylistsEndpoint: playlistsObject.next,
+              error: false,
+              errorMessage: '',
+              needsRefresh: false,
+            },
+          };
+        });
+        console.log(this.state.userPlaylists);
       })
       .catch((error) => {
         this.setState({

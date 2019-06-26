@@ -35,6 +35,8 @@ class CurrentPlaylist extends React.Component {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
     const fields = '?fields=next,total,items(track(album(name),artists(name),id,name,uri))';
+    // When you specify fields in your query parameters to Spotify's API,
+    // any paging objects returned in the response will include them too
     if (!endpoint.includes('?')) {
       endpoint += fields;
     }
