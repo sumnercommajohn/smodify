@@ -153,12 +153,22 @@ class App extends React.Component {
       playlistsMap.reverse();
     }
     const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
-    this.setState({
+    this.setState(prevstate => ({
       userPlaylists: {
+        ...prevstate.userPlaylists,
         items: [...playlistsSorted],
       },
-    });
+    }));
   };
+
+  refreshPlaylists = () => {
+    this.setState(prevstate => ({
+      userPlaylists: {
+        ...prevstate.userPlaylists,
+        needsRefresh: true,
+      },
+    }));
+  }
 
   setCurrentPlaylist = (playlist) => {
     const { currentPlaylist } = this.state;
@@ -200,8 +210,10 @@ class App extends React.Component {
             <CurrentPlaylist
               key={currentPlaylist.id}
               playlist={currentPlaylist}
-              fetchCurrentPlaylistTracks={this.fetchCurrentPlaylistTracks}
               token={token}
+              refreshPlaylists={this.refreshPlaylists}
+              userId={user.id}
+              setCurrentPlaylist={this.setCurrentPlaylist}
             />
           )
           : <Dashboard errorMessage={user.errorMessage} />

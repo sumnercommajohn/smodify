@@ -1,5 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
+import { createNewPlaylist } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -50,18 +51,19 @@ class CurrentPlaylist extends React.Component {
         }
         throw Error(`Request rejected with status ${response.status}`);
       })
-      .then((tracks) => {
+      .then((tracksObject) => {
         this.setState((prevState) => {
           const existingTracks = prevState.tracks.items || [];
-          const fetchedTracks = tracks.items;
+          const fetchedTracks = tracksObject.items;
           fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
           return {
             error: false,
             errorMessage: '',
             tracks: {
+              ...tracksObject,
               items: [...existingTracks, ...fetchedTracks],
             },
-            nextTracksEndpoint: tracks.next,
+            nextTracksEndpoint: tracksObject.next,
           };
         });
       })
@@ -73,7 +75,7 @@ class CurrentPlaylist extends React.Component {
           },
         });
       });
-  };
+  }
 
   toggleSelection = (id, checked) => {
     const prevSelection = [...this.state.selection];
@@ -92,10 +94,27 @@ class CurrentPlaylist extends React.Component {
     this.setState({ selection });
   }
 
+  duplicateCurrentPlaylist = () => {
+    const { token, userId, playlist } = this.props;
+    createNewPlaylist(token, userId, `${playlist.name} (Copy)`)
+      .then((playlistObject) => {
+        console.log(playlistObject);
+        this.props.refreshPlaylists();
+      })
+      .catch((error) => {
+        this.setState({
+          error: true,
+          errorMessage: error.message,
+        });
+      });
+  }
+
   render() {
     const {
-      name, images, owner: { display_name: ownerName }, tracks: { total },
-    } = this.props.playlist;
+      playlist: {
+        name, images, owner: { display_name: ownerName }, tracks: { total },
+      },
+    } = this.props;
     const { errorMessage, tracks: { items } } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
     return (
@@ -106,6 +125,9 @@ class CurrentPlaylist extends React.Component {
             <h3 className="current-playlist-title"> {name} </h3>
             <h4>By {ownerName}</h4>
             <span>{total} tracks</span>
+            <button type="button" className="copy-button" onClick={this.duplicateCurrentPlaylist}>
+              Clone Playlist
+            </button>
           </div>
         </section>
         {errorMessage && <ErrorMessage message={errorMessage} />}
