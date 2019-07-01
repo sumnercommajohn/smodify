@@ -1,6 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { createNewPlaylist } from '../helpers/spotifyHelpers';
+import { clonePlaylist } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -35,7 +35,7 @@ class CurrentPlaylist extends React.Component {
   fetchCurrentPlaylistTracks = (token, endpoint) => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
-    const fields = '?fields=next,total,items(track(album(name),artists(name),id,name,uri))';
+    const fields = '?fields=next,total,limit,items(track(album(name),artists(name),id,name,uri))';
     // When you specify fields in your query parameters to Spotify's API,
     // any paging objects returned in the response will include them too
     if (!endpoint.includes('?')) {
@@ -94,19 +94,23 @@ class CurrentPlaylist extends React.Component {
     this.setState({ selection });
   }
 
-  duplicateCurrentPlaylist = () => {
-    const { token, userId, playlist } = this.props;
-    createNewPlaylist(token, userId, `${playlist.name} (Copy)`)
-      .then((playlistObject) => {
-        console.log(playlistObject);
-        this.props.refreshPlaylists();
-      })
-      .catch((error) => {
-        this.setState({
-          error: true,
-          errorMessage: error.message,
-        });
+  duplicateCurrentPlaylist = async () => {
+    const {
+      token, userId, playlist, setCurrentPlaylist, refreshPlaylists,
+    } = this.props;
+    const { tracks } = this.state;
+    try {
+      const newPlaylist = await clonePlaylist(token, userId, playlist, tracks);
+      newPlaylist.images = [...playlist.images];
+
+      setCurrentPlaylist(newPlaylist);
+      refreshPlaylists();
+    } catch (error) {
+      this.setState({
+        error: true,
+        errorMessage: error.message,
       });
+    }
   }
 
   render() {

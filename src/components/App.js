@@ -121,7 +121,6 @@ class App extends React.Component {
             },
           };
         });
-        console.log(this.state.userPlaylists);
       })
       .catch((error) => {
         this.setState({
