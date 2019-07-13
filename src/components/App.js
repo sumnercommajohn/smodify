@@ -1,5 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
+import { fetchProfile, fetchSomePlaylists } from '../helpers/spotifyHelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
@@ -39,7 +40,7 @@ class App extends React.Component {
     this.setAuthError(authError);
     if (token) {
       this.setState({ token });
-      this.fetchProfile(token);
+      this.getProfile(token);
     }
   }
 
@@ -56,80 +57,53 @@ class App extends React.Component {
     });
   }
 
-  fetchProfile = (token) => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-
-    fetch('https://api.spotify.com/v1/me', {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((userData) => {
-        const { id, display_name: name } = userData;
-        this.setState({
-          user: {
-            name,
-            id,
-            error: false,
-            errorMessage: '',
-          },
-        });
-      })
-      .catch((error) => {
-        this.setState({
-          user: {
-            error: true,
-            errorMessage: error.message,
-          },
-        });
+  getProfile = async (token) => {
+    try {
+      const userProfile = await fetchProfile(token);
+      this.setState({
+        user: {
+          name: userProfile.display_name,
+          id: userProfile.id,
+          error: false,
+          errorMessage: '',
+        },
       });
+    } catch (error) {
+      this.setState({
+        user: {
+          error: true,
+          errorMessage: error.message,
+        },
+      });
+    }
   }
 
-  fetchUserPlaylists = (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-
-    fetch(endpoint, {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((playlistsObject) => {
-        const { needsRefresh } = this.state.userPlaylists;
-        this.setState((prevState) => {
-          const existingItems = needsRefresh
-            ? []
-            : prevState.userPlaylists.items;
-          return {
-            userPlaylists: {
-              items: [...existingItems, ...playlistsObject.items],
-              nextPlaylistsEndpoint: playlistsObject.next,
-              error: false,
-              errorMessage: '',
-              needsRefresh: false,
-            },
-          };
-        });
-      })
-      .catch((error) => {
-        this.setState({
+  getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
+    const { needsRefresh } = this.state.userPlaylists;
+    try {
+      const playlistsObject = await fetchSomePlaylists(token, endpoint);
+      this.setState((prevState) => {
+        const existingItems = needsRefresh
+          ? []
+          : prevState.userPlaylists.items;
+        return {
           userPlaylists: {
-            error: true,
-            errorMessage: error.message,
+            items: [...existingItems, ...playlistsObject.items],
+            nextPlaylistsEndpoint: playlistsObject.next,
+            error: false,
+            errorMessage: '',
+            needsRefresh: false,
           },
-        });
+        };
       });
+    } catch (error) {
+      this.setState({
+        userPlaylists: {
+          error: true,
+          errorMessage: error.message,
+        },
+      });
+    }
   }
 
   sortPlaylists = (sortBy, sortDescending = false) => {
@@ -198,7 +172,7 @@ class App extends React.Component {
               token={token}
               userPlaylists={userPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
-              fetchUserPlaylists={this.fetchUserPlaylists}
+              fetchUserPlaylists={this.getUserPlaylists}
               sortPlaylists={this.sortPlaylists}
             />
             )

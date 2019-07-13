@@ -1,6 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, waitForServerPropagation } from '../helpers/spotifyHelpers';
+import { clonePlaylist, waitForServerPropagation, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -10,6 +10,7 @@ class CurrentPlaylist extends React.Component {
     errorMessage: '',
     tracks: {
       items: [],
+      total: 0,
     },
     nextTracksEndpoint: null,
     selection: [],
@@ -18,7 +19,7 @@ class CurrentPlaylist extends React.Component {
   componentDidMount() {
     const { token, playlist } = this.props;
     if (playlist.tracks.total) {
-      this.fetchCurrentPlaylistTracks(token, playlist.tracks.href);
+      this.getSomeTracks(token, playlist.tracks.href);
     }
   }
 
@@ -27,54 +28,36 @@ class CurrentPlaylist extends React.Component {
     const { nextTracksEndpoint } = this.state;
 
     if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
-      this.fetchCurrentPlaylistTracks(token, nextTracksEndpoint);
+      this.getSomeTracks(token, nextTracksEndpoint);
     }
   }
 
 
-  fetchCurrentPlaylistTracks = (token, endpoint) => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-    const fields = '?fields=next,total,limit,items(track(album(name),artists(name),id,name,uri))';
-    // When you specify fields in your query parameters to Spotify's API,
-    // any paging objects returned in the response will include them too
-    if (!endpoint.includes('?')) {
-      endpoint += fields;
-    }
-    fetch(endpoint, {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((tracksObject) => {
-        this.setState((prevState) => {
-          const existingTracks = prevState.tracks.items || [];
-          const fetchedTracks = tracksObject.items;
-          fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
-          return {
-            error: false,
-            errorMessage: '',
-            tracks: {
-              ...tracksObject,
-              items: [...existingTracks, ...fetchedTracks],
-            },
-            nextTracksEndpoint: tracksObject.next,
-          };
-        });
-      })
-      .catch((error) => {
-        this.setState({
-          currentPlaylist: {
-            error: true,
-            errorMessage: error.message,
+  getSomeTracks = async (token, endpoint) => {
+    try {
+      const tracksObject = await fetchSomeTracks(token, endpoint);
+      this.setState((prevState) => {
+        const existingTracks = prevState.tracks.items || [];
+        const fetchedTracks = tracksObject.items;
+        fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
+        return {
+          error: false,
+          errorMessage: '',
+          tracks: {
+            ...tracksObject,
+            items: [...existingTracks, ...fetchedTracks],
           },
-        });
+          nextTracksEndpoint: tracksObject.next,
+        };
       });
+    } catch (error) {
+      this.setState({
+        currentPlaylist: {
+          error: true,
+          errorMessage: error.message,
+        },
+      });
+    }
   }
 
   toggleSelection = (id, checked) => {

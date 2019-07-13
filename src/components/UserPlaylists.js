@@ -12,7 +12,7 @@ class UserPlaylists extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     const {
       token,
       fetchUserPlaylists,
@@ -23,7 +23,8 @@ class UserPlaylists extends React.Component {
       fetchUserPlaylists(token);
     }
 
-    if (nextPlaylistsEndpoint) {
+    if (nextPlaylistsEndpoint
+      && nextPlaylistsEndpoint !== prevProps.userPlaylists.nextPlaylistsEndpoint) {
       fetchUserPlaylists(token, nextPlaylistsEndpoint);
     }
   }

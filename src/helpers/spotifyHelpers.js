@@ -1,3 +1,39 @@
+export async function fetchProfile(token) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+
+  const outcome = await fetch('https://api.spotify.com/v1/me', {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
+}
+
+export async function fetchSomePlaylists(token, endpoint = 'https://api.spotify.com/v1/me/playlists') {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+
+  const outcome = await fetch(endpoint, {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
+}
+
 export async function createNewPlaylist(token, userId, playlistName) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', `Bearer ${token}`);
@@ -64,10 +100,34 @@ export async function postAllTracks(token, playlistId, trackURIs, offset = 0, li
 export async function clonePlaylist(token, userId, playlist, tracks) {
   const trackURIs = getTrackURIs(tracks.items);
   const newPlaylist = await createNewPlaylist(token, userId, `${playlist.name} (Copy)`);
-
-  await postAllTracks(token, newPlaylist.id, trackURIs);
-  tracks.href = `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`;
   newPlaylist.images = [...playlist.images];
+  tracks.href = `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`;
+  if (trackURIs.length) {
+    await postAllTracks(token, newPlaylist.id, trackURIs);
+  }
 
   return { ...newPlaylist, tracks };
+}
+
+export async function fetchSomeTracks(token, endpoint) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+  const fields = '?fields=next,total,limit,items(track(album(name),artists(name),id,name,uri))';
+  // Checking for fields because when you specify fields in your query parameters,
+  // Spotify's API will include them in any paging objects returned in the response
+  if (!endpoint.includes('?')) {
+    endpoint += fields;
+  }
+  const outcome = await fetch(endpoint, {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
 }
