@@ -1,6 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, waitForServerPropagation, fetchSomeTracks } from '../helpers/spotifyHelpers';
+import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -79,20 +79,20 @@ class CurrentPlaylist extends React.Component {
 
   duplicateCurrentPlaylist = async () => {
     const {
-      token, userId, playlist, setCurrentPlaylist, refreshPlaylists,
+      token, userId, playlist, setCurrentPlaylist, updateUserPlaylists, refreshPlaylists,
     } = this.props;
     const { tracks } = this.state;
     try {
       const newPlaylist = await clonePlaylist(token, userId, playlist, tracks);
-      newPlaylist.images = [...playlist.images];
       setCurrentPlaylist(newPlaylist);
-      refreshPlaylists();
+      updateUserPlaylists(newPlaylist);
     } catch (error) {
       this.setState({
         error: true,
         errorMessage: error.message,
       });
     }
+    refreshPlaylists();
   }
 
   render() {

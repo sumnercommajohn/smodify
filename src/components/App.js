@@ -151,6 +151,22 @@ class App extends React.Component {
     }
   };
 
+  updateUserPlaylists = (playlist) => {
+    const playlistItems = [...this.state.userPlaylists.items];
+    const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
+    if (targetIndex < 0) {
+      playlistItems.unshift(playlist);
+    } else {
+      playlistItems[targetIndex] = { ...playlist };
+    }
+    this.setState(prevState => ({
+      userPlaylists: {
+        ...prevState.userPlaylists,
+        items: [...playlistItems],
+      },
+    }));
+  }
+
 
   render() {
     const {
@@ -187,6 +203,7 @@ class App extends React.Component {
               refreshPlaylists={this.refreshPlaylists}
               userId={user.id}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              updateUserPlaylists={this.updateUserPlaylists}
             />
           )
           : <Dashboard errorMessage={user.errorMessage} />
