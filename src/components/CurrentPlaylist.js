@@ -1,6 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist } from '../helpers/spotifyHelpers';
+import { clonePlaylist, waitForServerPropagation } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
 import { ErrorMessage } from './ErrorMessage';
 
@@ -22,11 +22,11 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     const { token } = this.props;
     const { nextTracksEndpoint } = this.state;
 
-    if (nextTracksEndpoint) {
+    if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
       this.fetchCurrentPlaylistTracks(token, nextTracksEndpoint);
     }
   }
@@ -102,7 +102,6 @@ class CurrentPlaylist extends React.Component {
     try {
       const newPlaylist = await clonePlaylist(token, userId, playlist, tracks);
       newPlaylist.images = [...playlist.images];
-
       setCurrentPlaylist(newPlaylist);
       refreshPlaylists();
     } catch (error) {

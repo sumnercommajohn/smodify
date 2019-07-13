@@ -1,4 +1,3 @@
-
 export async function createNewPlaylist(token, userId, playlistName) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', `Bearer ${token}`);
@@ -20,23 +19,6 @@ export async function createNewPlaylist(token, userId, playlistName) {
   return outcome;
 }
 
-export const fetchCreateNewPlaylist = (token, userId, playlistName) => {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', `Bearer ${token}`);
-  fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-    method: 'POST',
-    headers: myHeaders,
-    body: JSON.stringify({
-      name: playlistName,
-    }),
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw Error(`Request rejected with status ${response.status}`);
-    });
-};
 
 export const waitForServerPropagation = milliseconds => new Promise((resolve) => {
   setTimeout(resolve, milliseconds);
@@ -74,15 +56,18 @@ export async function postTracklistFragment(token, playlistId, trackURIs, offset
 export async function postAllTracks(token, playlistId, trackURIs, offset = 0, limit = 100) {
   const response = await postTracklistFragment(token, playlistId, trackURIs, offset, limit);
   if (response.offset <= trackURIs.length) {
-    postAllTracks(token, playlistId, trackURIs, response.offset, limit);
+    await postAllTracks(token, playlistId, trackURIs, response.offset, limit);
   }
 }
 
+
 export async function clonePlaylist(token, userId, playlist, tracks) {
-  const newPlaylist = await createNewPlaylist(token, userId, `${playlist.name} (Copy)`);
   const trackURIs = getTrackURIs(tracks.items);
+  const newPlaylist = await createNewPlaylist(token, userId, `${playlist.name} (Copy)`);
+
   await postAllTracks(token, newPlaylist.id, trackURIs);
   tracks.href = `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`;
   newPlaylist.images = [...playlist.images];
+
   return { ...newPlaylist, tracks };
 }

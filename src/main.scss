@@ -58,14 +58,13 @@ ul {
 }
 
 .app {
-  grid-template-columns: 1fr 3fr;
   height: 100vh;
   display: grid;
+  grid-template-columns: 1fr 2fr;
 }
 
 .dashboard {
   height: 100vh;
-  width: 100%;
   padding: 1rem;
   display: grid;
   align-content: center;
@@ -87,7 +86,8 @@ ul {
   background-color: black;
   color: #fbfbfb;
   padding: 1rem;
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .sidebar-component {
@@ -127,6 +127,7 @@ ul {
 
 .current-playlist{
   padding: 2rem;
+  word-break: break-all;
 }
 
 .current-playlist-header {
@@ -176,7 +177,7 @@ ul {
   font-weight: 700;
   width: 100%;
   display: inline-block;
-  word-break: break-all;
+  
 }
 
 .song-album {
