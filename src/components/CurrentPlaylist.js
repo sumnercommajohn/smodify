@@ -103,12 +103,14 @@ class CurrentPlaylist extends React.Component {
         <section className="current-playlist-header">
           <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
           <div className="current-playlist-details">
+            <div className="current-playlist-buttons">
+              <button type="button" className="copy-button" onClick={this.duplicateCurrentPlaylist}>
+              Clone Playlist
+              </button>
+            </div>
             <h3 className="current-playlist-title"> {name} </h3>
             <h4>By {ownerName}</h4>
             <span>{total} tracks</span>
-            <button type="button" className="copy-button" onClick={this.duplicateCurrentPlaylist}>
-              Clone Playlist
-            </button>
           </div>
         </section>
         {errorMessage && <ErrorMessage message={errorMessage} />}

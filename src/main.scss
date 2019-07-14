@@ -144,6 +144,17 @@ main {
   align-items: center;
 }
 
+
+.current-playlist-buttons button {
+  height: 4rem;
+  color: #fbfbfb;
+  font-weight: bold;
+  border: none;
+  background: cornflowerblue;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+}
+
 .current-playlist-image {
   width: 200px; 
   
