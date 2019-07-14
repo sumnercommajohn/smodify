@@ -91,7 +91,7 @@ export async function postTracklistFragment(token, playlistId, trackURIs, offset
 
 export async function postAllTracks(token, playlistId, trackURIs, offset = 0, limit = 100) {
   const response = await postTracklistFragment(token, playlistId, trackURIs, offset, limit);
-  if (response.offset <= trackURIs.length) {
+  if (response.offset < trackURIs.length) {
     await postAllTracks(token, playlistId, trackURIs, response.offset, limit);
   }
 }
