@@ -16,7 +16,6 @@ class App extends React.Component {
     user: {
       name: '',
       id: '',
-      error: false,
       errorMessage: '',
     },
     currentPlaylist: {
@@ -25,7 +24,6 @@ class App extends React.Component {
     userPlaylists: {
       items: [],
       nextPlaylistsEndpoint: null,
-      error: false,
       errorMessage: '',
       needsRefresh: false,
     },
@@ -51,7 +49,6 @@ class App extends React.Component {
       : '';
     this.setState({
       user: {
-        error,
         errorMessage,
       },
     });
@@ -64,14 +61,12 @@ class App extends React.Component {
         user: {
           name: userProfile.display_name,
           id: userProfile.id,
-          error: false,
           errorMessage: '',
         },
       });
     } catch (error) {
       this.setState({
         user: {
-          error: true,
           errorMessage: error.message,
         },
       });
@@ -90,19 +85,18 @@ class App extends React.Component {
           userPlaylists: {
             items: [...existingItems, ...playlistsObject.items],
             nextPlaylistsEndpoint: playlistsObject.next,
-            error: false,
             errorMessage: '',
             needsRefresh: false,
           },
         };
       });
     } catch (error) {
-      this.setState({
+      this.setState(prevState => ({
         userPlaylists: {
-          error: true,
+          ...prevState.userPlaylists,
           errorMessage: error.message,
         },
-      });
+      }));
     }
   }
 

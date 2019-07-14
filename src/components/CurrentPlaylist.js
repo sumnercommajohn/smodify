@@ -6,7 +6,6 @@ import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
   state = {
-    error: false,
     errorMessage: '',
     tracks: {
       items: [],
@@ -41,7 +40,6 @@ class CurrentPlaylist extends React.Component {
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
         return {
-          error: false,
           errorMessage: '',
           tracks: {
             ...tracksObject,
@@ -53,7 +51,6 @@ class CurrentPlaylist extends React.Component {
     } catch (error) {
       this.setState({
         currentPlaylist: {
-          error: true,
           errorMessage: error.message,
         },
       });
@@ -64,7 +61,6 @@ class CurrentPlaylist extends React.Component {
     const prevSelection = [...this.state.selection];
     if (prevSelection.length > 99) {
       this.setState({
-        error: true,
         errorMessage: 'Unable to select more than 100 items.',
       });
       return;
@@ -88,7 +84,6 @@ class CurrentPlaylist extends React.Component {
       updateUserPlaylists(newPlaylist);
     } catch (error) {
       this.setState({
-        error: true,
         errorMessage: error.message,
       });
     }
