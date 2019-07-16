@@ -55,6 +55,28 @@ export async function createNewPlaylist(token, userId, playlistName) {
   return outcome;
 }
 
+export async function fetchSomeTracks(token, endpoint) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+  const fields = '?fields=next,total,limit,items(track(album(name),artists(name),id,name,uri))';
+  // Checking for fields because when you specify fields in your query parameters,
+  // Spotify's API will include them in any paging objects returned in the response
+  if (!endpoint.includes('?')) {
+    endpoint += fields;
+  }
+  const outcome = await fetch(endpoint, {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
+}
 
 export const waitForServerPropagation = milliseconds => new Promise((resolve) => {
   setTimeout(resolve, milliseconds);
@@ -107,27 +129,4 @@ export async function clonePlaylist(token, userId, playlist, tracks) {
   }
 
   return { ...newPlaylist, tracks };
-}
-
-export async function fetchSomeTracks(token, endpoint) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', `Bearer ${token}`);
-  const fields = '?fields=next,total,limit,items(track(album(name),artists(name),id,name,uri))';
-  // Checking for fields because when you specify fields in your query parameters,
-  // Spotify's API will include them in any paging objects returned in the response
-  if (!endpoint.includes('?')) {
-    endpoint += fields;
-  }
-  const outcome = await fetch(endpoint, {
-    method: 'GET',
-    headers: myHeaders,
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw Error(`Request rejected with status ${response.status}`);
-    });
-
-  return outcome;
 }
