@@ -2,6 +2,7 @@ import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
+import CurrentPlaylistHeader from './CurrentPlaylistHeader';
 import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
@@ -92,27 +93,18 @@ class CurrentPlaylist extends React.Component {
 
   render() {
     const {
-      playlist: {
-        name, images, owner: { display_name: ownerName }, tracks: { total },
-      },
+      playlist,
     } = this.props;
     const { errorMessage, tracks: { items } } = this.state;
-    const imageSrc = images.length ? images[0].url : macaroon;
+
     return (
       <main className="current-playlist">
-        <section className="current-playlist-header">
-          <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
-          <div className="current-playlist-details">
-            <div className="current-playlist-buttons">
-              <button type="button" className="copy-button" onClick={this.duplicateCurrentPlaylist}>
-              Clone Playlist
-              </button>
-            </div>
-            <h3 className="current-playlist-title"> {name} </h3>
-            <h4>By {ownerName}</h4>
-            <span>{total} tracks</span>
-          </div>
-        </section>
+
+        <CurrentPlaylistHeader
+          duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+          updateCurrentPlaylist={this.props.updateCurrentPlaylist}
+          playlist={playlist}
+        />
         {errorMessage && <ErrorMessage message={errorMessage} />}
         <ul className="current-playlist-tracks">
           {items

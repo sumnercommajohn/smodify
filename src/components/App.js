@@ -145,6 +145,15 @@ class App extends React.Component {
     }
   };
 
+  updateCurrentPlaylist = (key, value) => {
+    this.setState(prevState => ({
+      currentPlaylist: {
+        ...prevState.currentPlaylist,
+        [key]: value,
+      },
+    }));
+  }
+
   updateUserPlaylists = (playlist) => {
     const playlistItems = [...this.state.userPlaylists.items];
     const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
@@ -197,6 +206,7 @@ class App extends React.Component {
               refreshPlaylists={this.refreshPlaylists}
               userId={user.id}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              updateCurrentPlaylist={this.updateCurrentPlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
             />
           )

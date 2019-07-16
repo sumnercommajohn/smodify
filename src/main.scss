@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.02);
   background-image: url("./assets/img/3contour.svg"), linear-gradient(to right, rgba(0, 0, 0, 0.021), rgba(17, 17, 17, 0.027));
   min-height: calc(100vh - 100px);
   margin: 0;
@@ -132,39 +132,97 @@ main {
 
 }
 
-.current-playlist{
-  padding: 2rem;
-  word-break: break-all;
-}
 
-.current-playlist-header {
+.playlist-header, .playlist-header-edit {
   display: grid;
   grid-template-columns: 1fr 7fr;
   gap: 2rem;
-  align-items: center;
 }
 
 
-.current-playlist-buttons button {
-  height: 4rem;
-  color: #fbfbfb;
-  font-weight: bold;
-  border: none;
-  background: cornflowerblue;
-  border-radius: 5px;
-  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+
+.current-playlist {
+
+  padding: 2rem;
+  word-break: break-all;
+
+  button {
+    height: 2.5rem;
+    color: #fbfbfb;
+    font-weight: bold;
+    border: none;
+    margin-right: 1rem;
+    border-radius: 5px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+
+    &.action {
+      background: cornflowerblue;
+    }
+
+    &.cancel {
+      background: indianred;
+    }
+
+    &[disabled] {
+      background: lightgrey;
+    }
+  }
+
+  .current-playlist-buttons, .options  {
+    margin-bottom: 1rem;
+  }
+  
+
+}
+
+.current-playlist-buttons button[disabled] {
+  
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.01);
 }
 
 .current-playlist-image {
   width: 200px; 
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1);
   
 }
 
 .current-playlist-title {
   font-size: 4rem;
   line-height: 4rem;
-  
+  font-weight: 800;
+  margin-bottom: 1rem;
+
 }
+
+.edit-playlist-form {
+
+
+  input.current-playlist-title {
+    display: block;
+    width: 100%;
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    border-bottom: 1px solid black;
+  }
+
+
+
+  .options {
+    display: flex;
+
+  }
+
+  .options label {
+    margin-right: 1.5rem;
+  }
+
+  .options button {
+    justify-self: right;
+  }
+}
+
 
 .current-playlist-tracks {
   display: grid;
