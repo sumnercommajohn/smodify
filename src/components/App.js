@@ -1,5 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
+import { fetchProfile, fetchSomePlaylists } from '../helpers/spotifyHelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
@@ -15,11 +16,16 @@ class App extends React.Component {
     user: {
       name: '',
       id: '',
-      error: false,
       errorMessage: '',
     },
     currentPlaylist: {
       name: '',
+    },
+    userPlaylists: {
+      items: [],
+      nextPlaylistsEndpoint: null,
+      errorMessage: '',
+      needsRefresh: false,
     },
   }
 
@@ -32,7 +38,7 @@ class App extends React.Component {
     this.setAuthError(authError);
     if (token) {
       this.setState({ token });
-      this.fetchProfile(token);
+      this.getProfile(token);
     }
   }
 
@@ -43,45 +49,116 @@ class App extends React.Component {
       : '';
     this.setState({
       user: {
-        error,
         errorMessage,
       },
     });
   }
 
-  fetchProfile = (token) => {
-    const myHeaders = new Headers();
-    myHeaders.append('Authorization', `Bearer ${token}`);
-
-    fetch('https://api.spotify.com/v1/me', {
-      method: 'GET',
-      headers: myHeaders,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw Error(`Request rejected with status ${response.status}`);
-      })
-      .then((userData) => {
-        const { id, display_name: name } = userData;
-        this.setState({
-          user: {
-            name,
-            id,
-            error: false,
-            errorMessage: '',
-          },
-        });
-      })
-      .catch((error) => {
-        this.setState({
-          user: {
-            error: true,
-            errorMessage: error.message,
-          },
-        });
+  getProfile = async (token) => {
+    try {
+      const userProfile = await fetchProfile(token);
+      this.setState({
+        user: {
+          name: userProfile.display_name,
+          id: userProfile.id,
+          errorMessage: '',
+        },
       });
+    } catch (error) {
+      this.setState({
+        user: {
+          errorMessage: error.message,
+        },
+      });
+    }
+  }
+
+  getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
+    const { needsRefresh } = this.state.userPlaylists;
+    try {
+      const playlistsObject = await fetchSomePlaylists(token, endpoint);
+      this.setState((prevState) => {
+        const existingItems = needsRefresh
+          ? []
+          : prevState.userPlaylists.items;
+        return {
+          userPlaylists: {
+            items: [...existingItems, ...playlistsObject.items],
+            nextPlaylistsEndpoint: playlistsObject.next,
+            errorMessage: '',
+            needsRefresh: false,
+          },
+        };
+      });
+    } catch (error) {
+      this.setState(prevState => ({
+        userPlaylists: {
+          ...prevState.userPlaylists,
+          errorMessage: error.message,
+        },
+      }));
+    }
+  }
+
+  sortPlaylists = (sortBy, sortDescending = false) => {
+    const { items } = this.state.userPlaylists;
+    const playlistsMap = items.map((playlist, i) => ({
+      index: i,
+      name: playlist.name.toLowerCase(),
+      total: playlist.tracks.total,
+    }));
+    playlistsMap.sort((a, b) => {
+      if (a[`${sortBy}`] > b[`${sortBy}`]) {
+        return 1;
+      }
+      if (a[`${sortBy}`] < b[`${sortBy}`]) {
+        return -1;
+      }
+      return 0;
+    });
+    if (sortDescending) {
+      playlistsMap.reverse();
+    }
+    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
+    this.setState(prevstate => ({
+      userPlaylists: {
+        ...prevstate.userPlaylists,
+        items: [...playlistsSorted],
+      },
+    }));
+  };
+
+  refreshPlaylists = () => {
+    this.setState(prevstate => ({
+      userPlaylists: {
+        ...prevstate.userPlaylists,
+        needsRefresh: true,
+      },
+    }));
+  }
+
+  setCurrentPlaylist = (playlist) => {
+    const { currentPlaylist } = this.state;
+    const selectedPlaylist = { ...playlist };
+    if (selectedPlaylist.id !== currentPlaylist.id) {
+      this.setState({ currentPlaylist: selectedPlaylist });
+    }
+  };
+
+  updateUserPlaylists = (playlist) => {
+    const playlistItems = [...this.state.userPlaylists.items];
+    const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
+    if (targetIndex < 0) {
+      playlistItems.unshift(playlist);
+    } else {
+      playlistItems[targetIndex] = { ...playlist };
+    }
+    this.setState(prevState => ({
+      userPlaylists: {
+        ...prevState.userPlaylists,
+        items: [...playlistItems],
+      },
+    }));
   }
 
 
@@ -99,6 +176,7 @@ class App extends React.Component {
       user,
       token,
       currentPlaylist,
+      userPlaylists,
     } = this.state;
     return (
       <div className="app">
@@ -111,7 +189,10 @@ class App extends React.Component {
             && (
             <UserPlaylists
               token={token}
+              userPlaylists={userPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              fetchUserPlaylists={this.getUserPlaylists}
+              sortPlaylists={this.sortPlaylists}
             />
             )
           }
@@ -121,8 +202,11 @@ class App extends React.Component {
             <CurrentPlaylist
               key={currentPlaylist.id}
               playlist={currentPlaylist}
-              fetchCurrentPlaylistTracks={this.fetchCurrentPlaylistTracks}
               token={token}
+              refreshPlaylists={this.refreshPlaylists}
+              userId={user.id}
+              setCurrentPlaylist={this.setCurrentPlaylist}
+              updateUserPlaylists={this.updateUserPlaylists}
             />
           )
           : <Dashboard errorMessage={user.errorMessage} />

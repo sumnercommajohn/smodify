@@ -1,7 +1,5 @@
 import React from 'react';
 import { getAuthURL } from '../config/authConfig';
 
-export const LoginLink = (props) => {
-  const { message, dialog } = props;
-  return (<a href={getAuthURL(dialog)}>{message}</a>);
-};
+
+export const LoginLink = ({ message, dialog }) => (<a href={getAuthURL(dialog)}>{message}</a>);
