@@ -1,7 +1,7 @@
 export const getAuthURL = (showDialog = false) => {
   const authEndpoint = 'https://accounts.spotify.com/authorize';
   const clientId = '10a41ddfc787418f9ef272f0bf886e86';
-  const redirectUri = 'http://localhost:8080/';
+  const redirectUri = 'https://shmotify.sumnercommajohn.now.sh/';
   const scopes = [
     'playlist-read-private',
     'playlist-modify-public',
