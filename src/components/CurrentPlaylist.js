@@ -8,6 +8,7 @@ import { ErrorMessage } from './ErrorMessage';
 class CurrentPlaylist extends React.Component {
   state = {
     errorMessage: '',
+    draftPlaylist: this.props.playlist,
     tracks: {
       items: [],
       total: 0,
@@ -51,9 +52,7 @@ class CurrentPlaylist extends React.Component {
       });
     } catch (error) {
       this.setState({
-        currentPlaylist: {
-          errorMessage: error.message,
-        },
+        errorMessage: error.message,
       });
     }
   }
@@ -76,13 +75,13 @@ class CurrentPlaylist extends React.Component {
 
   duplicateCurrentPlaylist = async () => {
     const {
-      token, userId, playlist, setCurrentPlaylist, updateUserPlaylists, refreshPlaylists,
+      token, userId, draftPlaylist, setCurrentPlaylist, updateUserPlaylists, refreshPlaylists,
     } = this.props;
     const { tracks } = this.state;
     try {
-      const newPlaylist = await clonePlaylist(token, userId, playlist, tracks);
-      setCurrentPlaylist(newPlaylist);
+      const newPlaylist = await clonePlaylist(token, userId, draftPlaylist, tracks);
       updateUserPlaylists(newPlaylist);
+      setCurrentPlaylist(newPlaylist);
     } catch (error) {
       this.setState({
         errorMessage: error.message,
@@ -91,19 +90,38 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
+  updateDraftPlaylist = (field, value) => {
+    console.log(field, value);
+    this.setState(prevState => ({
+      draftPlaylist: {
+        ...prevState.draftPlaylist,
+        [field]: value,
+      },
+    }));
+  }
+
+  resetDraftPlaylist = () => {
+    this.setState({
+      draftPlaylist: this.props.playlist,
+    });
+  }
+
   render() {
     const {
-      playlist,
+      updateCurrentPlaylist,
+      updateUserPlaylists,
     } = this.props;
-    const { errorMessage, tracks: { items } } = this.state;
+    const { errorMessage, draftPlaylist, tracks: { items } } = this.state;
 
     return (
       <main className="current-playlist">
 
         <CurrentPlaylistHeader
           duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
-          updateCurrentPlaylist={this.props.updateCurrentPlaylist}
-          playlist={playlist}
+          updateUserPlaylists={updateUserPlaylists}
+          updateCurrentPlaylist={updateCurrentPlaylist}
+          updateDraftPlaylist={this.updateDraftPlaylist}
+          draftPlaylist={draftPlaylist}
         />
         {errorMessage && <ErrorMessage message={errorMessage} />}
         <ul className="current-playlist-tracks">

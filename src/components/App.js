@@ -20,6 +20,7 @@ class App extends React.Component {
     },
     currentPlaylist: {
       name: '',
+      edit: false,
     },
     userPlaylists: {
       items: [],
@@ -145,19 +146,17 @@ class App extends React.Component {
     }
   };
 
-  updateCurrentPlaylist = (key, value) => {
-    this.setState(prevState => ({
-      currentPlaylist: {
-        ...prevState.currentPlaylist,
-        [key]: value,
-      },
-    }));
+  updateCurrentPlaylist = (playlist) => {
+    this.setState({
+      currentPlaylist: { ...playlist },
+    });
+    this.updateUserPlaylists(playlist);
   }
 
   updateUserPlaylists = (playlist) => {
     const playlistItems = [...this.state.userPlaylists.items];
     const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
-    if (targetIndex < 0) {
+    if (targetIndex === -1) {
       playlistItems.unshift(playlist);
     } else {
       playlistItems[targetIndex] = { ...playlist };
@@ -197,7 +196,7 @@ class App extends React.Component {
             )
           }
         </Sidebar>
-        { currentPlaylist.name
+        { currentPlaylist.id
           ? (
             <CurrentPlaylist
               key={currentPlaylist.id}

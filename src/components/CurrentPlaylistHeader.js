@@ -1,75 +1,54 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
+import EditCurrentPlaylistDetails from './EditCurrentPlaylistDetails';
+import { CurrentPlaylistDetails } from './CurrentPlaylistDetails';
 
 class CurrentPlaylistHeader extends React.Component {
-  nameRef = React.createRef();
-
-  componentDidMount() {
-    this.nameRef.current.focus();
+  state={
+    edit: false,
   }
 
-
-  handleChange = (e) => {
-    this.props.updateCurrentPlaylist(e.target.id, e.target.value);
+  toggleEdit = () => {
+    this.setState(prevState => ({
+      edit: !prevState.edit,
+    }));
   }
+
 
   render() {
     const {
+      updateCurrentPlaylist,
       duplicateCurrentPlaylist,
-      playlist: {
-        name, images, owner: { display_name: ownerName }, tracks: { total },
-      },
+      updateDraftPlaylist,
+      draftPlaylist,
+      draftPlaylist: { images },
     } = this.props;
+    const { edit } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
     return (
       <section className="current-playlist-header">
         <div className="playlist-header">
           <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
-          <div className="current-playlist-details">
-            <div className="current-playlist-buttons">
-              <button type="button" className="action" onClick={duplicateCurrentPlaylist}>
+          <div className="current-playlist-buttons">
+            <button type="button" className="action" onClick={duplicateCurrentPlaylist} disabled={edit}>
                 Clone Playlist
-              </button>
-              <button type="button" className="action">
+            </button>
+            <button type="button" className="action" onClick={this.toggleEdit} disabled={edit}>
                 Edit Playlist
-              </button>
-            </div>
-            <h3 className="current-playlist-title"> {name} </h3>
-            <h4>By {ownerName}</h4>
-            <span>{total} tracks</span>
+            </button>
           </div>
-        </div>
-        <div className="playlist-header">
-          <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
-          <div className="current-playlist-details">
-            <div className="current-playlist-buttons">
-              <button type="button" className="action" disabled onClick={duplicateCurrentPlaylist}>
-                Clone Playlist
-              </button>
-              <button type="button" disabled className="action">
-                Edit Playlist
-              </button>
-            </div>
+          {edit
+            ? (
+              <EditCurrentPlaylistDetails
+                toggleEdit={this.toggleEdit}
+                draftPlaylist={draftPlaylist}
+                updateDraftPlaylist={updateDraftPlaylist}
+                {...this.props}
+              />
+            )
+            : <CurrentPlaylistDetails {...this.props} />
+           }
 
-            <form className="edit-playlist-form" action="submit">
-              <label htmlFor="name">
-                <input className="current-playlist-title" id="name" type="text" ref={this.nameRef} onFocus={e => e.target.select()} value={name} onChange={e => this.handleChange(e)} />
-              </label>
-              <div className="options">
-                <label htmlFor="collaborative">
-                  <input id="collaborative" type="checkbox" onChange={e => this.handleChange(e)} />
-              Collaborative
-                </label>
-                <label htmlFor="public">
-                  <input id="public" type="checkbox" onChange={e => this.handleChange(e)} />
-              Public
-                </label>
-
-                <button className="action" type="button">Save</button>
-                <button className="cancel" type="button">Cancel</button>
-              </div>
-            </form>
-          </div>
         </div>
       </section>
 
