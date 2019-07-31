@@ -18,8 +18,10 @@ class App extends React.Component {
       id: '',
       errorMessage: '',
     },
+    editingPlaylist: false,
     currentPlaylist: {
       name: '',
+      edit: false,
     },
     userPlaylists: {
       items: [],
@@ -145,10 +147,21 @@ class App extends React.Component {
     }
   };
 
+  toggleEditPlaylist = () => {
+    this.setState(prevState => ({ editingPlaylist: !prevState.editingPlaylist }));
+  }
+
+  updateCurrentPlaylist = (playlist) => {
+    this.setState({
+      currentPlaylist: { ...playlist },
+    });
+    this.updateUserPlaylists(playlist);
+  }
+
   updateUserPlaylists = (playlist) => {
     const playlistItems = [...this.state.userPlaylists.items];
     const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
-    if (targetIndex < 0) {
+    if (targetIndex === -1) {
       playlistItems.unshift(playlist);
     } else {
       playlistItems[targetIndex] = { ...playlist };
@@ -176,6 +189,7 @@ class App extends React.Component {
       user,
       token,
       currentPlaylist,
+      editingPlaylist,
       userPlaylists,
     } = this.state;
     return (
@@ -197,15 +211,18 @@ class App extends React.Component {
             )
           }
         </Sidebar>
-        { currentPlaylist.name
+        { currentPlaylist.id
           ? (
             <CurrentPlaylist
               key={currentPlaylist.id}
-              playlist={currentPlaylist}
               token={token}
-              refreshPlaylists={this.refreshPlaylists}
               userId={user.id}
+              playlist={currentPlaylist}
+              editingPlaylist={editingPlaylist}
+              refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              toggleEditPlaylist={this.toggleEditPlaylist}
+              updateCurrentPlaylist={this.updateCurrentPlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
             />
           )
