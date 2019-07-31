@@ -18,6 +18,7 @@ class App extends React.Component {
       id: '',
       errorMessage: '',
     },
+    editingPlaylist: false,
     currentPlaylist: {
       name: '',
       edit: false,
@@ -146,6 +147,10 @@ class App extends React.Component {
     }
   };
 
+  toggleEditPlaylist = () => {
+    this.setState(prevState => ({ editingPlaylist: !prevState.editingPlaylist }));
+  }
+
   updateCurrentPlaylist = (playlist) => {
     this.setState({
       currentPlaylist: { ...playlist },
@@ -175,6 +180,7 @@ class App extends React.Component {
       user,
       token,
       currentPlaylist,
+      editingPlaylist,
       userPlaylists,
     } = this.state;
     return (
@@ -200,11 +206,13 @@ class App extends React.Component {
           ? (
             <CurrentPlaylist
               key={currentPlaylist.id}
-              playlist={currentPlaylist}
               token={token}
-              refreshPlaylists={this.refreshPlaylists}
               userId={user.id}
+              playlist={currentPlaylist}
+              editingPlaylist={editingPlaylist}
+              refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              toggleEditPlaylist={this.toggleEditPlaylist}
               updateCurrentPlaylist={this.updateCurrentPlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
             />
