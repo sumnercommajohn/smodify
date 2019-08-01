@@ -161,6 +161,16 @@ class App extends React.Component {
     }));
   }
 
+
+  setCurrentPlaylist = (playlist) => {
+    const { currentPlaylist } = this.state;
+    const selectedPlaylist = { ...playlist };
+    if (selectedPlaylist.id !== currentPlaylist.id) {
+      this.setState({ currentPlaylist: selectedPlaylist });
+    }
+  };
+
+
   render() {
     const {
       user,

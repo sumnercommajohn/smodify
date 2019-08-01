@@ -9,5 +9,3 @@ export const Dashboard = ({ errorMessage }) => (
     <Landing />
   </main>
 );
-
-export default Dashboard;
