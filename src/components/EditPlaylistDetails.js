@@ -22,7 +22,6 @@ class EditPlaylistDetails extends React.Component {
     const { draftPlaylist, updateCurrentPlaylist, toggleEditPlaylist } = this.props;
     e.preventDefault();
     updateCurrentPlaylist(draftPlaylist);
-    toggleEditPlaylist();
   }
 
   handleCancel = (e) => {

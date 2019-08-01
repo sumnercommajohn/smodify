@@ -10,7 +10,7 @@ class PlaylistHeader extends React.Component {
       imageSrc,
       playlist,
       draftPlaylist,
-      editingPlaylist,
+      edit,
       toggleEditPlaylist,
       updateCurrentPlaylist,
       duplicateCurrentPlaylist,
@@ -22,7 +22,7 @@ class PlaylistHeader extends React.Component {
       <section className="current-playlist-header">
         <div className="playlist-header">
           <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
-          {editingPlaylist
+          {edit
             ? (
               <EditPlaylistDetails
                 draftPlaylist={draftPlaylist}
@@ -35,12 +35,12 @@ class PlaylistHeader extends React.Component {
             : <PlaylistDetails playlist={playlist} />
            }
           <div className="current-playlist-buttons">
-            <button type="button" className="action" onClick={duplicateCurrentPlaylist} disabled={editingPlaylist}>
+            <button type="button" className="action" onClick={duplicateCurrentPlaylist} disabled={edit}>
                 Clone Playlist
             </button>
             { userId === playlist.owner.id
             && (
-            <button type="button" className="action" onClick={toggleEditPlaylist} disabled={editingPlaylist}>
+            <button type="button" className="action" onClick={toggleEditPlaylist} disabled={edit}>
                 Edit Playlist
             </button>
             )

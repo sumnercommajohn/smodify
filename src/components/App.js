@@ -20,7 +20,9 @@ class App extends React.Component {
     },
     editingPlaylist: false,
     currentPlaylist: {
-      name: '',
+      playlist: {
+        id: '',
+      },
       edit: false,
     },
     userPlaylists: {
@@ -143,17 +145,32 @@ class App extends React.Component {
     const { currentPlaylist } = this.state;
     const selectedPlaylist = { ...playlist };
     if (selectedPlaylist.id !== currentPlaylist.id) {
-      this.setState({ currentPlaylist: selectedPlaylist });
+      this.setState({
+        currentPlaylist: {
+          edit: false,
+          playlist: {
+            ...selectedPlaylist,
+          },
+        },
+      });
     }
   };
 
   toggleEditPlaylist = () => {
-    this.setState(prevState => ({ editingPlaylist: !prevState.editingPlaylist }));
+    this.setState(prevState => ({
+      currentPlaylist: {
+        ...prevState.currentPlaylist,
+        edit: !prevState.currentPlaylist.edit,
+      },
+    }));
   }
 
   updateCurrentPlaylist = (playlist) => {
     this.setState({
-      currentPlaylist: { ...playlist },
+      currentPlaylist: {
+        edit: false,
+        playlist: { ...playlist },
+      },
     });
     this.updateUserPlaylists(playlist);
   }
@@ -175,21 +192,11 @@ class App extends React.Component {
   }
 
 
-  setCurrentPlaylist = (playlist) => {
-    const { currentPlaylist } = this.state;
-    const selectedPlaylist = { ...playlist };
-    if (selectedPlaylist.id !== currentPlaylist.id) {
-      this.setState({ currentPlaylist: selectedPlaylist });
-    }
-  };
-
-
   render() {
     const {
       user,
       token,
       currentPlaylist,
-      editingPlaylist,
       userPlaylists,
     } = this.state;
     return (
@@ -211,14 +218,13 @@ class App extends React.Component {
             )
           }
         </Sidebar>
-        { currentPlaylist.id
+        { currentPlaylist.playlist.id
           ? (
             <CurrentPlaylist
-              key={currentPlaylist.id}
+              key={currentPlaylist.playlist.id}
               token={token}
               userId={user.id}
-              playlist={currentPlaylist}
-              editingPlaylist={editingPlaylist}
+              currentPlaylist={currentPlaylist}
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}

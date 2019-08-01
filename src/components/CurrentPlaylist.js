@@ -8,7 +8,7 @@ import { ErrorMessage } from './ErrorMessage';
 class CurrentPlaylist extends React.Component {
   state = {
     errorMessage: '',
-    draftPlaylist: this.props.playlist,
+    draftPlaylist: this.props.currentPlaylist.playlist,
     tracks: {
       items: [],
       total: 0,
@@ -18,7 +18,7 @@ class CurrentPlaylist extends React.Component {
   }
 
   componentDidMount() {
-    const { token, playlist } = this.props;
+    const { token, currentPlaylist: { playlist } } = this.props;
     if (playlist.tracks.total) {
       this.getSomeTracks(token, playlist.tracks.href);
     }
@@ -75,7 +75,7 @@ class CurrentPlaylist extends React.Component {
 
   duplicateCurrentPlaylist = async () => {
     const {
-      token, userId, playlist,
+      token, userId, currentPlaylist: { playlist },
       setCurrentPlaylist, toggleEditPlaylist, updateUserPlaylists, refreshPlaylists,
     } = this.props;
     const { tracks } = this.state;
@@ -103,22 +103,20 @@ class CurrentPlaylist extends React.Component {
 
   resetDraftPlaylist = () => {
     this.setState({
-      draftPlaylist: this.props.playlist,
+      draftPlaylist: this.props.currentPlaylist.playlist,
     });
   }
 
   render() {
     const {
       userId,
-      playlist,
-      playlist: { images },
-      editingPlaylist,
+      currentPlaylist: { edit, playlist, playlist: { images } },
       updateCurrentPlaylist,
       updateUserPlaylists,
       toggleEditPlaylist,
     } = this.props;
-    const imageSrc = images.length ? images[0].url : macaroon;
     const { errorMessage, draftPlaylist, tracks: { items } } = this.state;
+    const imageSrc = images.length ? images[0].url : macaroon;
 
     return (
       <main className="current-playlist">
@@ -128,7 +126,7 @@ class CurrentPlaylist extends React.Component {
           imageSrc={imageSrc}
           playlist={playlist}
           draftPlaylist={draftPlaylist}
-          editingPlaylist={editingPlaylist}
+          edit={edit}
           toggleEditPlaylist={toggleEditPlaylist}
           duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
           updateUserPlaylists={updateUserPlaylists}
