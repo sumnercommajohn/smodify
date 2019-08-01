@@ -2,13 +2,17 @@ import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
-import PlaylistHeader from './PlaylistHeader';
+import { PlaylistHeader } from './PlaylistHeader';
+import EditPlaylistDetails from './EditPlaylistDetails';
+import { PlaylistDetails } from './PlaylistDetails';
+import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
   state = {
     errorMessage: '',
     draftPlaylist: this.props.currentPlaylist.playlist,
+    ownedByUser: (this.props.userId === this.props.currentPlaylist.playlist.owner.id),
     tracks: {
       items: [],
       total: 0,
@@ -109,33 +113,38 @@ class CurrentPlaylist extends React.Component {
 
   render() {
     const {
-      userId,
       currentPlaylist: { edit, playlist, playlist: { images } },
       updateCurrentPlaylist,
-      updateUserPlaylists,
       toggleEditPlaylist,
     } = this.props;
-    const { errorMessage, draftPlaylist, tracks: { items } } = this.state;
+    const {
+      errorMessage, draftPlaylist, tracks: { items }, ownedByUser,
+    } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
 
     return (
       <main className="current-playlist">
 
-        <PlaylistHeader
-          userId={userId}
-          imageSrc={imageSrc}
-          playlist={playlist}
-          draftPlaylist={draftPlaylist}
-          edit={edit}
-          toggleEditPlaylist={toggleEditPlaylist}
-          duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
-          updateUserPlaylists={updateUserPlaylists}
-          updateCurrentPlaylist={updateCurrentPlaylist}
-          updateDraftPlaylist={this.updateDraftPlaylist}
-          resetDraftPlaylist={this.resetDraftPlaylist}
-
-
-        />
+        <PlaylistHeader imageSrc={imageSrc}>
+          {edit
+            ? (
+              <EditPlaylistDetails
+                draftPlaylist={draftPlaylist}
+                updateDraftPlaylist={this.updateDraftPlaylist}
+                resetDraftPlaylist={this.resetDraftPlaylist}
+                updateCurrentPlaylist={updateCurrentPlaylist}
+                toggleEditPlaylist={toggleEditPlaylist}
+              />
+            )
+            : <PlaylistDetails playlist={playlist} />
+           }
+          <PlaylistButtons
+            duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+            edit={edit}
+            ownedByUser={ownedByUser}
+            toggleEditPlaylist={toggleEditPlaylist}
+          />
+        </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
         <ul className="current-playlist-tracks">
           {items

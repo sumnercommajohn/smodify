@@ -212,7 +212,7 @@ class App extends React.Component {
               token={token}
               userPlaylists={userPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
-              fetchUserPlaylists={this.getUserPlaylists}
+              getUserPlaylists={this.getUserPlaylists}
               sortPlaylists={this.sortPlaylists}
             />
             )
