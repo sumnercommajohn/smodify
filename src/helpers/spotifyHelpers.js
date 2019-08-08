@@ -111,6 +111,31 @@ export async function postTracklistFragment(token, playlistId, trackURIs, offset
   });
 }
 
+export async function changePlaylistDetails(token, playlist) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+
+  const outcome = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}`, {
+    method: 'PUT',
+    headers: myHeaders,
+    body: JSON.stringify({
+      name: playlist.name,
+      public: playlist.public,
+    }),
+  })
+    .then((response) => {
+      console.log(response);
+      if (response.ok) {
+        return;
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return ({
+    playlist,
+  });
+}
+
 export async function postAllTracks(token, playlistId, trackURIs, offset = 0, limit = 100) {
   const response = await postTracklistFragment(token, playlistId, trackURIs, offset, limit);
   if (response.offset < trackURIs.length) {

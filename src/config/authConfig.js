@@ -48,5 +48,8 @@ export const getTokenFromLocal = () => {
 
 export const checkURIforError = () => {
   const query = window.location.search.substring(1);
-  return query.includes('error');
+  if (query.includes('error')) {
+    return ({ message: 'Spotify profile not connected' });
+  }
+  return false;
 };
