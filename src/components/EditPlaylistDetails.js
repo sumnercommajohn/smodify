@@ -19,9 +19,9 @@ class EditPlaylistDetails extends React.Component {
 
 
   handleSubmit = (e) => {
-    const { draftPlaylist, updateCurrentPlaylist, toggleEditPlaylist } = this.props;
+    const { draftPlaylist, changeCurrentPlaylistDetails } = this.props;
     e.preventDefault();
-    updateCurrentPlaylist(draftPlaylist);
+    changeCurrentPlaylistDetails(draftPlaylist);
   }
 
   handleCancel = (e) => {
@@ -31,7 +31,7 @@ class EditPlaylistDetails extends React.Component {
 
   render() {
     const {
-      name, collaborative, public: isPublic,
+      name, public: isPublic,
     } = this.props.draftPlaylist;
     return (
       <form className="edit-playlist-form" action="submit" onSubmit={e => this.handleSubmit(e)}>
@@ -39,10 +39,6 @@ class EditPlaylistDetails extends React.Component {
           <input className="current-playlist-title" id="name" type="text" ref={this.nameRef} onFocus={e => e.target.select()} value={name} onChange={e => this.handleChange(e)} />
         </label>
         <div className="options">
-          <label htmlFor="collaborative">
-            <input id="collaborative" type="checkbox" checked={collaborative} onChange={e => this.handleChange(e)} />
-              Collaborative
-          </label>
           <label htmlFor="public">
             <input id="public" type="checkbox" checked={isPublic} onChange={e => this.handleChange(e)} />
               Public

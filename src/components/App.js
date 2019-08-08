@@ -1,6 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists } from '../helpers/spotifyHelpers';
+import { fetchProfile, fetchSomePlaylists, changePlaylistDetails } from '../helpers/spotifyHelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
@@ -13,22 +13,20 @@ import CurrentPlaylist from './CurrentPlaylist';
 class App extends React.Component {
   state = {
     token: '',
+    errorMessage: '',
     user: {
       name: '',
       id: '',
-      errorMessage: '',
     },
-    editingPlaylist: false,
     currentPlaylist: {
       playlist: {
         id: '',
       },
-      edit: false,
+      editing: false,
     },
     userPlaylists: {
       items: [],
       nextPlaylistsEndpoint: null,
-      errorMessage: '',
       needsRefresh: false,
     },
   }
@@ -36,51 +34,42 @@ class App extends React.Component {
   componentDidMount() {
     let token = getTokenFromURI();
     const authError = checkURIforError();
-    if (!token) {
+    if (!token && !authError) {
       token = getTokenFromLocal();
     }
-    this.setAuthError(authError);
+    this.setError(authError);
     if (token) {
       this.setState({ token });
       this.getProfile(token);
     }
   }
 
-
-  setAuthError = (error) => {
-    const errorMessage = error
-      ? 'Profile access revoked by user.'
-      : '';
-    this.setState({
-      user: {
-        errorMessage,
-      },
-    });
+  setError = (error) => {
+    const errorMessage = error ? error.message : '';
+    this.setState({ errorMessage });
   }
 
   getProfile = async (token) => {
     try {
       const userProfile = await fetchProfile(token);
+      this.setError();
       this.setState({
         user: {
           name: userProfile.display_name,
           id: userProfile.id,
-          errorMessage: '',
         },
       });
     } catch (error) {
-      this.setState({
-        user: {
-          errorMessage: error.message,
-        },
-      });
+      this.setError(error);
     }
   }
+
 
   getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
+      this.setError();
       this.setState((prevState) => {
         const existingItems = needsRefresh
           ? []
@@ -89,18 +78,12 @@ class App extends React.Component {
           userPlaylists: {
             items: [...existingItems, ...playlistsObject.items],
             nextPlaylistsEndpoint: playlistsObject.next,
-            errorMessage: '',
             needsRefresh: false,
           },
         };
       });
     } catch (error) {
-      this.setState(prevState => ({
-        userPlaylists: {
-          ...prevState.userPlaylists,
-          errorMessage: error.message,
-        },
-      }));
+      this.setError(error);
     }
   }
 
@@ -147,7 +130,7 @@ class App extends React.Component {
     if (selectedPlaylist.id !== currentPlaylist.id) {
       this.setState({
         currentPlaylist: {
-          edit: false,
+          editing: false,
           playlist: {
             ...selectedPlaylist,
           },
@@ -160,19 +143,26 @@ class App extends React.Component {
     this.setState(prevState => ({
       currentPlaylist: {
         ...prevState.currentPlaylist,
-        edit: !prevState.currentPlaylist.edit,
+        editing: !prevState.currentPlaylist.editing,
       },
     }));
   }
 
-  updateCurrentPlaylist = (playlist) => {
-    this.setState({
-      currentPlaylist: {
-        edit: false,
-        playlist: { ...playlist },
-      },
-    });
-    this.updateUserPlaylists(playlist);
+  changeCurrentPlaylistDetails = async (playlist) => {
+    const { token } = this.state;
+    try {
+      await changePlaylistDetails(token, playlist);
+      this.setError();
+      this.setState({
+        currentPlaylist: {
+          editing: false,
+          playlist: { ...playlist },
+        },
+      });
+      this.updateUserPlaylists(playlist);
+    } catch (error) {
+      this.setError(error);
+    }
   }
 
   updateUserPlaylists = (playlist) => {
@@ -198,6 +188,7 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
+      errorMessage,
     } = this.state;
     return (
       <div className="app">
@@ -224,15 +215,17 @@ class App extends React.Component {
               key={currentPlaylist.playlist.id}
               token={token}
               userId={user.id}
+              errorMessage={errorMessage}
               currentPlaylist={currentPlaylist}
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}
-              updateCurrentPlaylist={this.updateCurrentPlaylist}
+              changeCurrentPlaylistDetails={this.changeCurrentPlaylistDetails}
               updateUserPlaylists={this.updateUserPlaylists}
+              setError={this.setError}
             />
           )
-          : <Dashboard errorMessage={user.errorMessage} />
+          : <Dashboard errorMessage={errorMessage} />
         }
 
 

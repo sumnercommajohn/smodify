@@ -10,7 +10,7 @@ import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
   state = {
-    errorMessage: '',
+    warning: '',
     draftPlaylist: this.props.currentPlaylist.playlist,
     ownedByUser: (this.props.userId === this.props.currentPlaylist.playlist.owner.id),
     tracks: {
@@ -39,14 +39,15 @@ class CurrentPlaylist extends React.Component {
 
 
   getSomeTracks = async (token, endpoint) => {
+    const { setError } = this.props;
     try {
       const tracksObject = await fetchSomeTracks(token, endpoint);
+      setError();
       this.setState((prevState) => {
         const existingTracks = prevState.tracks.items || [];
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
         return {
-          errorMessage: '',
           tracks: {
             ...tracksObject,
             items: [...existingTracks, ...fetchedTracks],
@@ -55,9 +56,7 @@ class CurrentPlaylist extends React.Component {
         };
       });
     } catch (error) {
-      this.setState({
-        errorMessage: error.message,
-      });
+      setError(error);
     }
   }
 
@@ -65,7 +64,7 @@ class CurrentPlaylist extends React.Component {
     const prevSelection = [...this.state.selection];
     if (prevSelection.length > 99) {
       this.setState({
-        errorMessage: 'Unable to select more than 100 items.',
+        warning: 'Unable to select more than 100 items.',
       });
       return;
     }
@@ -80,7 +79,7 @@ class CurrentPlaylist extends React.Component {
   duplicateCurrentPlaylist = async () => {
     const {
       token, userId, currentPlaylist: { playlist },
-      setCurrentPlaylist, toggleEditPlaylist, updateUserPlaylists, refreshPlaylists,
+      setCurrentPlaylist, setError, toggleEditPlaylist, updateUserPlaylists, refreshPlaylists,
     } = this.props;
     const { tracks } = this.state;
     try {
@@ -88,10 +87,9 @@ class CurrentPlaylist extends React.Component {
       updateUserPlaylists(newPlaylist);
       setCurrentPlaylist(newPlaylist);
       toggleEditPlaylist();
+      setError();
     } catch (error) {
-      this.setState({
-        errorMessage: error.message,
-      });
+      setError(error);
     }
     refreshPlaylists();
   }
@@ -113,12 +111,13 @@ class CurrentPlaylist extends React.Component {
 
   render() {
     const {
-      currentPlaylist: { edit, playlist, playlist: { images } },
-      updateCurrentPlaylist,
+      errorMessage,
+      currentPlaylist: { editing, playlist, playlist: { images } },
+      changeCurrentPlaylistDetails,
       toggleEditPlaylist,
     } = this.props;
     const {
-      errorMessage, draftPlaylist, tracks: { items }, ownedByUser,
+      draftPlaylist, tracks: { items }, ownedByUser,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
 
@@ -126,13 +125,13 @@ class CurrentPlaylist extends React.Component {
       <main className="current-playlist">
 
         <PlaylistHeader imageSrc={imageSrc}>
-          {edit
+          {editing
             ? (
               <EditPlaylistDetails
                 draftPlaylist={draftPlaylist}
                 updateDraftPlaylist={this.updateDraftPlaylist}
                 resetDraftPlaylist={this.resetDraftPlaylist}
-                updateCurrentPlaylist={updateCurrentPlaylist}
+                changeCurrentPlaylistDetails={changeCurrentPlaylistDetails}
                 toggleEditPlaylist={toggleEditPlaylist}
               />
             )
@@ -140,7 +139,7 @@ class CurrentPlaylist extends React.Component {
            }
           <PlaylistButtons
             duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
-            edit={edit}
+            editing={editing}
             ownedByUser={ownedByUser}
             toggleEditPlaylist={toggleEditPlaylist}
           />
