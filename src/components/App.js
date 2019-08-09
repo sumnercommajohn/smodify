@@ -1,6 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists, changePlaylistDetails } from '../helpers/spotifyHelpers';
+import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyHelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
@@ -19,10 +19,8 @@ class App extends React.Component {
       id: '',
     },
     currentPlaylist: {
-      playlist: {
-        id: '',
-      },
-      editing: false,
+      id: '',
+      isEditing: false,
     },
     userPlaylists: {
       items: [],
@@ -69,7 +67,6 @@ class App extends React.Component {
     const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
-      this.setError();
       this.setState((prevState) => {
         const existingItems = needsRefresh
           ? []
@@ -82,6 +79,7 @@ class App extends React.Component {
           },
         };
       });
+      this.setError();
     } catch (error) {
       this.setError(error);
     }
@@ -130,10 +128,8 @@ class App extends React.Component {
     if (selectedPlaylist.id !== currentPlaylist.id) {
       this.setState({
         currentPlaylist: {
-          editing: false,
-          playlist: {
-            ...selectedPlaylist,
-          },
+          isEditing: false,
+          id: selectedPlaylist.id,
         },
       });
     }
@@ -143,25 +139,29 @@ class App extends React.Component {
     this.setState(prevState => ({
       currentPlaylist: {
         ...prevState.currentPlaylist,
-        editing: !prevState.currentPlaylist.editing,
+        isEditing: !prevState.currentPlaylist.isEditing,
       },
     }));
   }
 
-  changeCurrentPlaylistDetails = async (playlist) => {
-    const { token } = this.state;
+  deletePlaylist = async () => {
+    const { token, currentPlaylist: { id }, userPlaylists: { items } } = this.state;
+    const updatedPlaylists = items.filter(item => item.id !== id);
     try {
-      await changePlaylistDetails(token, playlist);
-      this.setError();
-      this.setState({
+      await unfollowPlaylist(token, id);
+      this.setState(prevState => ({
         currentPlaylist: {
-          editing: false,
-          playlist: { ...playlist },
+          id: '',
+          isEditing: false,
         },
-      });
-      this.updateUserPlaylists(playlist);
+        userPlaylists: {
+          ...prevState.userPlaylists,
+          items: [...updatedPlaylists],
+        },
+      }));
+      this.setError();
     } catch (error) {
-      this.setError(error);
+      this.setError();
     }
   }
 
@@ -179,6 +179,7 @@ class App extends React.Component {
         items: [...playlistItems],
       },
     }));
+    this.setError();
   }
 
 
@@ -188,8 +189,11 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
+      userPlaylists: { items },
       errorMessage,
     } = this.state;
+    const playlist = items
+      .find(playlistItem => (playlistItem.id === currentPlaylist.id));
     return (
       <div className="app">
         <Sidebar>
@@ -209,18 +213,19 @@ class App extends React.Component {
             )
           }
         </Sidebar>
-        { currentPlaylist.playlist.id
+        { currentPlaylist.id
           ? (
             <CurrentPlaylist
-              key={currentPlaylist.playlist.id}
+              key={currentPlaylist.id}
               token={token}
               userId={user.id}
+              isEditing={currentPlaylist.isEditing}
               errorMessage={errorMessage}
-              currentPlaylist={currentPlaylist}
+              playlist={playlist}
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}
-              changeCurrentPlaylistDetails={this.changeCurrentPlaylistDetails}
+              deletePlaylist={this.deletePlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}
             />

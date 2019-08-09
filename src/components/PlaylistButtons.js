@@ -1,18 +1,21 @@
 import React from 'react';
 
 export const PlaylistButtons = ({
-  duplicateCurrentPlaylist, editing, ownedByUser, toggleEditPlaylist,
+  duplicateCurrentPlaylist, isEditing, ownedByUser, toggleEditPlaylist, deletePlaylist,
 }) => (
   <div className="current-playlist-buttons">
-    <button type="button" className="action" onClick={duplicateCurrentPlaylist} disabled={editing}>
-        Clone Playlist
+    <button type="button" className="action" onClick={duplicateCurrentPlaylist} disabled={isEditing}>
+        Clone
     </button>
     { ownedByUser
     && (
-    <button type="button" className="action" onClick={toggleEditPlaylist} disabled={editing}>
-        Edit Playlist
+    <button type="button" className="action" onClick={toggleEditPlaylist} disabled={isEditing}>
+        Edit
     </button>
     )
     }
+    <button type="button" className="danger" onClick={deletePlaylist} disabled={isEditing}>
+      {ownedByUser ? 'Delete' : 'Unfollow'}
+    </button>
   </div>
 );

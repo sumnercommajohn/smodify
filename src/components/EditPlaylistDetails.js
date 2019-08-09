@@ -1,4 +1,5 @@
 import React from 'react';
+import { changePlaylistDetails } from '../helpers/spotifyHelpers';
 
 
 class EditPlaylistDetails extends React.Component {
@@ -18,10 +19,18 @@ class EditPlaylistDetails extends React.Component {
   }
 
 
-  handleSubmit = (e) => {
-    const { draftPlaylist, changeCurrentPlaylistDetails } = this.props;
+  handleSubmit = async (e) => {
+    const {
+      draftPlaylist, token, updateUserPlaylists, toggleEditPlaylist,
+    } = this.props;
     e.preventDefault();
-    changeCurrentPlaylistDetails(draftPlaylist);
+    try {
+      await changePlaylistDetails(token, draftPlaylist);
+      updateUserPlaylists(draftPlaylist);
+      toggleEditPlaylist();
+    } catch (error) {
+      this.setError(error);
+    }
   }
 
   handleCancel = (e) => {
