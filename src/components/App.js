@@ -19,10 +19,8 @@ class App extends React.Component {
       id: '',
     },
     currentPlaylist: {
-      playlist: {
-        id: '',
-      },
-      editing: false,
+      id: '',
+      isEditing: false,
     },
     userPlaylists: {
       items: [],
@@ -69,7 +67,6 @@ class App extends React.Component {
     const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
-      this.setError();
       this.setState((prevState) => {
         const existingItems = needsRefresh
           ? []
@@ -82,6 +79,7 @@ class App extends React.Component {
           },
         };
       });
+      this.setError();
     } catch (error) {
       this.setError(error);
     }
@@ -130,10 +128,8 @@ class App extends React.Component {
     if (selectedPlaylist.id !== currentPlaylist.id) {
       this.setState({
         currentPlaylist: {
-          editing: false,
-          playlist: {
-            ...selectedPlaylist,
-          },
+          isEditing: false,
+          id: selectedPlaylist.id,
         },
       });
     }
@@ -143,26 +139,9 @@ class App extends React.Component {
     this.setState(prevState => ({
       currentPlaylist: {
         ...prevState.currentPlaylist,
-        editing: !prevState.currentPlaylist.editing,
+        isEditing: !prevState.currentPlaylist.isEditing,
       },
     }));
-  }
-
-  changeCurrentPlaylistDetails = async (playlist) => {
-    const { token } = this.state;
-    try {
-      await changePlaylistDetails(token, playlist);
-      this.setError();
-      this.setState({
-        currentPlaylist: {
-          editing: false,
-          playlist: { ...playlist },
-        },
-      });
-      this.updateUserPlaylists(playlist);
-    } catch (error) {
-      this.setError(error);
-    }
   }
 
   updateUserPlaylists = (playlist) => {
@@ -179,6 +158,7 @@ class App extends React.Component {
         items: [...playlistItems],
       },
     }));
+    this.setError();
   }
 
 
@@ -188,8 +168,11 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
+      userPlaylists: { items },
       errorMessage,
     } = this.state;
+    const playlist = items
+      .find(playlistItem => (playlistItem.id === currentPlaylist.id));
     return (
       <div className="app">
         <Sidebar>
@@ -209,18 +192,18 @@ class App extends React.Component {
             )
           }
         </Sidebar>
-        { currentPlaylist.playlist.id
+        { currentPlaylist.id
           ? (
             <CurrentPlaylist
-              key={currentPlaylist.playlist.id}
+              key={currentPlaylist.id}
               token={token}
               userId={user.id}
+              isEditing={currentPlaylist.isEditing}
               errorMessage={errorMessage}
-              currentPlaylist={currentPlaylist}
+              playlist={playlist}
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}
-              changeCurrentPlaylistDetails={this.changeCurrentPlaylistDetails}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}
             />
