@@ -151,7 +151,8 @@ main {
       background: cornflowerblue;
     }
 
-    &.cancel {
+    &.cancel,
+    &.danger {
       background: indianred;
     }
 

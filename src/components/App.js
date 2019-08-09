@@ -1,6 +1,6 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists, changePlaylistDetails } from '../helpers/spotifyHelpers';
+import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyHelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
@@ -144,6 +144,27 @@ class App extends React.Component {
     }));
   }
 
+  deletePlaylist = async () => {
+    const { token, currentPlaylist: { id }, userPlaylists: { items } } = this.state;
+    const updatedPlaylists = items.filter(item => item.id !== id);
+    try {
+      await unfollowPlaylist(token, id);
+      this.setState(prevState => ({
+        currentPlaylist: {
+          id: '',
+          isEditing: false,
+        },
+        userPlaylists: {
+          ...prevState.userPlaylists,
+          items: [...updatedPlaylists],
+        },
+      }));
+      this.setError();
+    } catch (error) {
+      this.setError();
+    }
+  }
+
   updateUserPlaylists = (playlist) => {
     const playlistItems = [...this.state.userPlaylists.items];
     const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
@@ -204,6 +225,7 @@ class App extends React.Component {
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}
+              deletePlaylist={this.deletePlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}
             />

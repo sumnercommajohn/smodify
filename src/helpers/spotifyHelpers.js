@@ -115,7 +115,7 @@ export async function changePlaylistDetails(token, playlist) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', `Bearer ${token}`);
 
-  const outcome = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}`, {
+  await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}`, {
     method: 'PUT',
     headers: myHeaders,
     body: JSON.stringify({
@@ -130,10 +130,23 @@ export async function changePlaylistDetails(token, playlist) {
       }
       throw Error(`Request rejected with status ${response.status}`);
     });
+}
 
-  return ({
-    playlist,
-  });
+export async function unfollowPlaylist(token, id) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+
+  await fetch(`https://api.spotify.com/v1/playlists/${id}/followers`, {
+    method: 'DELETE',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      console.log(response);
+      if (response.ok) {
+        return;
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
 }
 
 export async function postAllTracks(token, playlistId, trackURIs, offset = 0, limit = 100) {

@@ -114,6 +114,7 @@ class CurrentPlaylist extends React.Component {
       isEditing,
       playlist, playlist: { images },
       updateUserPlaylists,
+      deletePlaylist,
       toggleEditPlaylist,
       token,
     } = this.props;
@@ -141,6 +142,7 @@ class CurrentPlaylist extends React.Component {
            }
           <PlaylistButtons
             duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+            deletePlaylist={deletePlaylist}
             isEditing={isEditing}
             ownedByUser={ownedByUser}
             toggleEditPlaylist={toggleEditPlaylist}
