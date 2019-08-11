@@ -1,7 +1,7 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyHelpers';
-import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../config/authConfig';
+import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../helpers/authHelpers';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
