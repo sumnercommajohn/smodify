@@ -3,7 +3,7 @@ import TrackItem from './TrackItem';
 
 class TrackList extends React.Component {
   render() {
-    const { items, toggleSelection } = this.props;
+    const { items, toggleSelection, toggleChecked } = this.props;
     return (
       <ul className="tracklist">
         {items
@@ -11,10 +11,12 @@ class TrackList extends React.Component {
         <TrackItem
           key={trackItem.uid}
           uid={trackItem.uid}
+          isChecked={trackItem.isChecked}
           album={trackItem.track.album}
           artists={trackItem.track.artists}
           name={trackItem.track.name}
           toggleSelection={toggleSelection}
+          toggleChecked={toggleChecked}
         />
       ))}
       </ul>

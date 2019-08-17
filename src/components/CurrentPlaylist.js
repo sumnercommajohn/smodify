@@ -1,4 +1,5 @@
 import React from 'react';
+import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
@@ -10,8 +11,6 @@ import PlaylistTracks from './PlaylistTracks';
 import TracksToolbar from './TracksToolbar';
 import TrackList from './TrackList';
 
-import TrackItem from './TrackItem';
-
 
 class CurrentPlaylist extends React.Component {
   state = {
@@ -22,7 +21,6 @@ class CurrentPlaylist extends React.Component {
       total: 0,
     },
     nextTracksEndpoint: null,
-    selection: [],
   }
 
   componentDidMount() {
@@ -51,6 +49,7 @@ class CurrentPlaylist extends React.Component {
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => {
           item.uid = i + Date.now();
+          item.isChecked = false;
         });
         return {
           tracks: {
@@ -66,16 +65,44 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
-
-  toggleSelection = (id, checked) => {
-    const prevSelection = [...this.state.selection];
-
-    const selection = checked
-      ? [...prevSelection, id]
-      : prevSelection.filter(item => item !== id);
-
-    this.setState({ selection });
+  toggleChecked = (uid, checkedState) => {
+    this.setState((prevState) => {
+      const items = [...prevState.tracks.items];
+      const targetIndex = items.findIndex(item => item.uid === uid);
+      items[targetIndex].isChecked = checkedState;
+      return ({
+        tracks: {
+          ...prevState.tracks,
+          items: [...items],
+        },
+      });
+    });
   }
+
+  clearSelection = () => {
+    this.setState(prevState => ({
+      tracks: {
+        ...prevState.tracks,
+        items: (prevState.tracks.items.map((item) => {
+          item.isChecked = false;
+          return item;
+        })),
+      },
+    }));
+  }
+
+  selectAll = () => {
+    this.setState(prevState => ({
+      tracks: {
+        ...prevState.tracks,
+        items: (prevState.tracks.items.map((item) => {
+          item.isChecked = true;
+          return item;
+        })),
+      },
+    }));
+  }
+
 
   duplicateCurrentPlaylist = async () => {
     const {
@@ -121,10 +148,10 @@ class CurrentPlaylist extends React.Component {
     } = this.props;
     const {
       draftPlaylist, tracks: { items }, ownedByUser,
-      selection,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
-
+    const allTracksChecked = items.every(item => item.isChecked);
+    const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
       <main className="current-playlist">
 
@@ -154,8 +181,17 @@ class CurrentPlaylist extends React.Component {
         {items
         && (
         <PlaylistTracks>
-          <TracksToolbar selection={selection} />
-          <TrackList items={items} toggleSelection={this.toggleSelection} />
+          <TracksToolbar
+            clearSelection={this.clearSelection}
+            selectAll={this.selectAll}
+            allTracksChecked={allTracksChecked}
+            numberOfChecked={numberOfChecked}
+          />
+          <TrackList
+            items={items}
+            toggleSelection={this.toggleSelection}
+            toggleChecked={this.toggleChecked}
+          />
         </PlaylistTracks>
         )
         }
