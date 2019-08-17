@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlaylistItem } from './PlaylistItem';
+import PlaylistItem from './PlaylistItem';
 import { ErrorMessage } from './ErrorMessage';
 import SortButton from './SortButton';
 

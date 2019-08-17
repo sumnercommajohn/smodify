@@ -1,16 +1,20 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
-import TrackItem from './TrackItem';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
 import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
+import PlaylistTracks from './PlaylistTracks';
+import TracksToolbar from './TracksToolbar';
+import TrackList from './TrackList';
+
+import TrackItem from './TrackItem';
+
 
 class CurrentPlaylist extends React.Component {
   state = {
-    warning: '',
     draftPlaylist: this.props.playlist,
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
@@ -45,7 +49,9 @@ class CurrentPlaylist extends React.Component {
       this.setState((prevState) => {
         const existingTracks = prevState.tracks.items || [];
         const fetchedTracks = tracksObject.items;
-        fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
+        fetchedTracks.forEach((item, i) => {
+          item.uid = i + Date.now();
+        });
         return {
           tracks: {
             ...tracksObject,
@@ -60,14 +66,9 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
+
   toggleSelection = (id, checked) => {
     const prevSelection = [...this.state.selection];
-    if (prevSelection.length > 99) {
-      this.setState({
-        warning: 'Unable to select more than 100 items.',
-      });
-      return;
-    }
 
     const selection = checked
       ? [...prevSelection, id]
@@ -120,6 +121,7 @@ class CurrentPlaylist extends React.Component {
     } = this.props;
     const {
       draftPlaylist, tracks: { items }, ownedByUser,
+      selection,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
 
@@ -149,20 +151,14 @@ class CurrentPlaylist extends React.Component {
           />
         </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
-        <ul className="current-playlist-tracks">
-          {items
-              && items.map(trackItem => (
-                <TrackItem
-                  key={trackItem.key}
-                  uid={trackItem.key}
-                  album={trackItem.track.album}
-                  artists={trackItem.track.artists}
-                  name={trackItem.track.name}
-                  toggleSelection={this.toggleSelection}
-                />
-              ))}
-        </ul>
-
+        {items
+        && (
+        <PlaylistTracks>
+          <TracksToolbar selection={selection} />
+          <TrackList items={items} toggleSelection={this.toggleSelection} />
+        </PlaylistTracks>
+        )
+        }
       </main>
     );
   }

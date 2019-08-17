@@ -162,7 +162,7 @@ export async function clonePlaylist(token, userId, playlist, tracks) {
   const newPlaylist = await createNewPlaylist(token, userId, `${playlist.name} (Copy)`);
   newPlaylist.images = [...playlist.images];
   tracks.href = `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`;
-  if (trackURIs.length) {
+  if (trackURIs.length > 0) {
     await postAllTracks(token, newPlaylist.id, trackURIs);
   }
 
