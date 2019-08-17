@@ -1,16 +1,19 @@
 import React from 'react';
+import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
-import TrackItem from './TrackItem';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
 import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
+import PlaylistTracks from './PlaylistTracks';
+import TracksToolbar from './TracksToolbar';
+import TrackList from './TrackList';
+
 
 class CurrentPlaylist extends React.Component {
   state = {
-    warning: '',
     draftPlaylist: this.props.playlist,
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
@@ -18,7 +21,6 @@ class CurrentPlaylist extends React.Component {
       total: 0,
     },
     nextTracksEndpoint: null,
-    selection: [],
   }
 
   componentDidMount() {
@@ -45,7 +47,10 @@ class CurrentPlaylist extends React.Component {
       this.setState((prevState) => {
         const existingTracks = prevState.tracks.items || [];
         const fetchedTracks = tracksObject.items;
-        fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
+        fetchedTracks.forEach((item, i) => {
+          item.uid = i + Date.now();
+          item.isChecked = false;
+        });
         return {
           tracks: {
             ...tracksObject,
@@ -60,21 +65,44 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
-  toggleSelection = (id, checked) => {
-    const prevSelection = [...this.state.selection];
-    if (prevSelection.length > 99) {
-      this.setState({
-        warning: 'Unable to select more than 100 items.',
+  toggleChecked = (uid, checkedState) => {
+    this.setState((prevState) => {
+      const items = [...prevState.tracks.items];
+      const targetIndex = items.findIndex(item => item.uid === uid);
+      items[targetIndex].isChecked = checkedState;
+      return ({
+        tracks: {
+          ...prevState.tracks,
+          items: [...items],
+        },
       });
-      return;
-    }
-
-    const selection = checked
-      ? [...prevSelection, id]
-      : prevSelection.filter(item => item !== id);
-
-    this.setState({ selection });
+    });
   }
+
+  clearSelection = () => {
+    this.setState(prevState => ({
+      tracks: {
+        ...prevState.tracks,
+        items: (prevState.tracks.items.map((item) => {
+          item.isChecked = false;
+          return item;
+        })),
+      },
+    }));
+  }
+
+  selectAll = () => {
+    this.setState(prevState => ({
+      tracks: {
+        ...prevState.tracks,
+        items: (prevState.tracks.items.map((item) => {
+          item.isChecked = true;
+          return item;
+        })),
+      },
+    }));
+  }
+
 
   duplicateCurrentPlaylist = async () => {
     const {
@@ -122,7 +150,8 @@ class CurrentPlaylist extends React.Component {
       draftPlaylist, tracks: { items }, ownedByUser,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
-
+    const allTracksChecked = items.every(item => item.isChecked);
+    const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
       <main className="current-playlist">
 
@@ -149,20 +178,23 @@ class CurrentPlaylist extends React.Component {
           />
         </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
-        <ul className="current-playlist-tracks">
-          {items
-              && items.map(trackItem => (
-                <TrackItem
-                  key={trackItem.key}
-                  uid={trackItem.key}
-                  album={trackItem.track.album}
-                  artists={trackItem.track.artists}
-                  name={trackItem.track.name}
-                  toggleSelection={this.toggleSelection}
-                />
-              ))}
-        </ul>
-
+        {items
+        && (
+        <PlaylistTracks>
+          <TracksToolbar
+            clearSelection={this.clearSelection}
+            selectAll={this.selectAll}
+            allTracksChecked={allTracksChecked}
+            numberOfChecked={numberOfChecked}
+          />
+          <TrackList
+            items={items}
+            toggleSelection={this.toggleSelection}
+            toggleChecked={this.toggleChecked}
+          />
+        </PlaylistTracks>
+        )
+        }
       </main>
     );
   }

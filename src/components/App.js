@@ -126,6 +126,7 @@ class App extends React.Component {
     const { currentPlaylist } = this.state;
     const selectedPlaylist = { ...playlist };
     if (selectedPlaylist.id !== currentPlaylist.id) {
+      this.setError();
       this.setState({
         currentPlaylist: {
           isEditing: false,
