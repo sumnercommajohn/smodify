@@ -1,7 +1,6 @@
 import React from 'react';
-import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
+import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
@@ -18,7 +17,6 @@ class CurrentPlaylist extends React.Component {
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
       items: [],
-      total: 0,
     },
     nextTracksEndpoint: null,
   }
@@ -103,6 +101,26 @@ class CurrentPlaylist extends React.Component {
     }));
   }
 
+  deleteSelectedTracks = async () => {
+    const {
+      token, playlist, setError, updateUserPlaylists,
+    } = this.props;
+    const { tracks: { items } } = this.state;
+    const selection = items.filter(item => item.isChecked === true);
+    try {
+      const response = await removeSelectedTracks(token, playlist, selection);
+      const remaining = items.filter(item => item.isChecked === false);
+      console.log(response);
+      this.setState({
+        tracks: {
+          items: [...remaining],
+        },
+      });
+    } catch (error) {
+      setError(error);
+    }
+  }
+
 
   duplicateCurrentPlaylist = async () => {
     const {
@@ -121,6 +139,8 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
+
+  // Need to Rewrite this to accept an object of new fields/values
   updateDraftPlaylist = (field, value) => {
     this.setState(prevState => ({
       draftPlaylist: {
@@ -178,7 +198,7 @@ class CurrentPlaylist extends React.Component {
           />
         </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
-        {items
+        {items.length >= 1
         && (
         <PlaylistTracks>
           <TracksToolbar
@@ -186,6 +206,7 @@ class CurrentPlaylist extends React.Component {
             selectAll={this.selectAll}
             allTracksChecked={allTracksChecked}
             numberOfChecked={numberOfChecked}
+            deleteSelectedTracks={this.deleteSelectedTracks}
           />
           <TrackList
             items={items}
