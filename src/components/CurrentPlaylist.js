@@ -29,11 +29,14 @@ class CurrentPlaylist extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { token } = this.props;
-    const { nextTracksEndpoint } = this.state;
+    const { token, updateUserPlaylists } = this.props;
+    const { nextTracksEndpoint, draftPlaylist } = this.state;
 
     if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
       this.getSomeTracks(token, nextTracksEndpoint);
+    }
+    if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
+      updateUserPlaylists(draftPlaylist);
     }
   }
 
@@ -101,16 +104,20 @@ class CurrentPlaylist extends React.Component {
     }));
   }
 
+  // TODO: don't need updateDraftPlaylist, can just update in setState
   deleteSelectedTracks = async () => {
     const {
-      token, playlist, setError, updateUserPlaylists,
+      token, playlist, setError,
     } = this.props;
-    const { tracks: { items } } = this.state;
+    const { tracks: { items }, draftPlaylist } = this.state;
     const selection = items.filter(item => item.isChecked === true);
     try {
       const response = await removeSelectedTracks(token, playlist, selection);
       const remaining = items.filter(item => item.isChecked === false);
-      console.log(response);
+      const updatedDraft = { ...draftPlaylist };
+      updatedDraft.snapshot_id = response.snapshot_id;
+      updatedDraft.tracks.total = remaining.length;
+      this.updateDraftPlaylist(updatedDraft);
       this.setState({
         tracks: {
           items: [...remaining],
@@ -139,13 +146,11 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
-
-  // Need to Rewrite this to accept an object of new fields/values
-  updateDraftPlaylist = (field, value) => {
+  updateDraftPlaylist = (updatesObject) => {
     this.setState(prevState => ({
       draftPlaylist: {
         ...prevState.draftPlaylist,
-        [field]: value,
+        ...updatesObject,
       },
     }));
   }
