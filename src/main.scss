@@ -66,6 +66,7 @@ ul {
 }
 
 .app {
+  position: relative;
   height: 100vh;
   width: 100%;
   display: grid;
@@ -142,7 +143,7 @@ main {
 }
 
 .current-playlist {
-  padding: 2rem;
+  padding: 0;
   overflow-wrap: break-word;
   word-break: break-all;
   line-break: loose;
@@ -172,6 +173,7 @@ main {
   }
 
   .playlist-header {
+    padding: 2rem;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
@@ -228,48 +230,64 @@ main {
 }
 
 .current-playlist-tracks {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   justify-content: right;
-  // row-gap: 1rem;
 }
 
 .playlist-track-row {
   width: 100%;
   font-size: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 23fr;
-  padding: 1rem;
-  gap: 1rem;
-  align-items: center;
+  display: flex;
+
   border: 1.5px solid #ffffff;
   z-index: 1;
 
+  .checkbox-label {
+    display: flex;
+    text-align: center;
+    min-width: 6rem;
+    min-height: 6rem;
+
+    justify-items: center;
+    align-items: center;
+  }
+
   background-color: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.057), -0.5px 0 2px rgba(0, 0, 0, 0.064);
-  // border-bottom-color: scale-color($dark, $alpha: -80%);
-
-  &.tracks-toolbar {
-    border-bottom: 1px solid #a1a1a162;
-  }
 
   &.checked {
     background-color: #fcfcfc;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.178), 0 0px 5px rgba(0, 0, 0, 0.137);
     border: 1.5px solid scale-color($blue, $alpha: -50%);
-    z-index: 2;
+    // z-index: 2;
   }
 }
 
+.tracks-toolbar {
+  border-bottom: 1px solid #a1a1a162;
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+}
+
 .song-details {
+  display: flex;
+  flex-wrap: wrap;
+
+  padding: 1rem 0;
   line-height: 1.8rem;
+  width: 100%;
 }
 
 .song-title {
   font-size: 1.9rem;
   font-weight: 700;
   width: 100%;
-  display: inline-block;
+
+  flex-grow: 1;
 }
 
 .song-album {

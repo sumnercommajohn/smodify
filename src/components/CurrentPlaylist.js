@@ -36,6 +36,7 @@ class CurrentPlaylist extends React.Component {
       this.getSomeTracks(token, nextTracksEndpoint);
     }
     if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
+      console.log('updating draft playlist');
       updateUserPlaylists(draftPlaylist);
     }
   }
@@ -114,15 +115,19 @@ class CurrentPlaylist extends React.Component {
     try {
       const response = await removeSelectedTracks(token, playlist, selection);
       const remaining = items.filter(item => item.isChecked === false);
-      const updatedDraft = { ...draftPlaylist };
-      updatedDraft.snapshot_id = response.snapshot_id;
-      updatedDraft.tracks.total = remaining.length;
-      this.updateDraftPlaylist(updatedDraft);
-      this.setState({
+      this.setState(prevState => ({
+        draftPlaylist: {
+          ...prevState.draftPlaylist,
+          snapshot_id: response.snapshot_id,
+          tracks: {
+            ...prevState.draftPlaylist.tracks,
+            total: remaining.length,
+          },
+        },
         tracks: {
           items: [...remaining],
         },
-      });
+      }));
     } catch (error) {
       setError(error);
     }
