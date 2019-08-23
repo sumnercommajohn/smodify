@@ -66,6 +66,7 @@ ul {
 }
 
 .app {
+  position: relative;
   height: 100vh;
   width: 100%;
   display: grid;
@@ -142,8 +143,10 @@ main {
 }
 
 .current-playlist {
-  padding: 2rem;
+  padding: 0;
+  overflow-wrap: break-word;
   word-break: break-all;
+  line-break: loose;
 
   button {
     height: 2.5rem;
@@ -153,14 +156,26 @@ main {
     margin-right: 1rem;
     border-radius: 2px;
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.3);
+    }
 
     &.action {
       background: $blue;
+      &:hover {
+        background: darken($blue, 10%);
+      }
     }
 
     &.cancel,
     &.danger {
       background: $red;
+      &:hover {
+        background: saturate($red, 20%);
+      }
     }
 
     &[disabled] {
@@ -170,11 +185,16 @@ main {
   }
 
   .playlist-header {
+    padding: 2rem;
     display: grid;
-    grid-template-columns: 1fr 7fr;
+    grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     gap: 1rem 2rem;
     margin-bottom: 20px;
+
+    @media only screen and (min-width: 900px) {
+      grid-template-columns: 1fr 7fr;
+    }
 
     .current-playlist-image {
       width: 200px;
@@ -222,48 +242,84 @@ main {
 }
 
 .current-playlist-tracks {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  justify-content: right;
-  // row-gap: 1rem;
+  // justify-content: right;
 }
 
 .playlist-track-row {
   width: 100%;
   font-size: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 23fr;
-  padding: 1rem;
-  gap: 1rem;
-  align-items: center;
+  display: flex;
+
   border: 1.5px solid #ffffff;
   z-index: 1;
 
+  .checkbox-label {
+    display: flex;
+    text-align: center;
+    min-width: 6rem;
+    min-height: 6rem;
+
+    justify-items: center;
+    align-items: center;
+  }
+
   background-color: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.057), -0.5px 0 2px rgba(0, 0, 0, 0.064);
-  // border-bottom-color: scale-color($dark, $alpha: -80%);
-
-  &.tracks-toolbar {
-    border-bottom: 1px solid #a1a1a162;
-  }
 
   &.checked {
     background-color: #fcfcfc;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.178), 0 0px 5px rgba(0, 0, 0, 0.137);
     border: 1.5px solid scale-color($blue, $alpha: -50%);
-    z-index: 2;
+    // z-index: 2;
+  }
+}
+
+.tracks-toolbar {
+  border-bottom: 1px solid #a1a1a162;
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+
+  .toolbar-controls {
+    width: 100%;
+    .remove-tracks {
+      float: right;
+    }
+
+    .clear-selection {
+      color: $dark;
+      height: 2rem;
+      width: 2rem;
+      border-radius: 50%;
+      margin: 0 2px;
+
+      &:hover {
+        background: $dark;
+        color: white;
+      }
+    }
   }
 }
 
 .song-details {
+  display: flex;
+  flex-wrap: wrap;
+
+  padding: 1rem 0;
   line-height: 1.8rem;
+  width: 100%;
 }
 
 .song-title {
   font-size: 1.9rem;
   font-weight: 700;
   width: 100%;
-  display: inline-block;
+
+  flex-grow: 1;
 }
 
 .song-album {

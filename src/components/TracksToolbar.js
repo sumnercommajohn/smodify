@@ -19,20 +19,22 @@ class TracksToolbar extends React.Component {
   render() {
     const {
       clearSelection, allTracksChecked, numberOfChecked,
+      deleteSelectedTracks,
     } = this.props;
 
     return (
       <div className="tracks-toolbar playlist-track-row">
-        <label htmlFor="select-all">
+        <label className="checkbox-label" htmlFor="select-all">
           <input className="checkbox" type="checkbox" id="select-all" onChange={this.handleChange} checked={allTracksChecked} />
         </label>
         <div className="toolbar-controls">
           {(numberOfChecked >= 1)
               && (
-                <span className="toolbar-controls">
+                <>
                   {this.printNumberOfChecked()}
-                  <button type="button" onClick={clearSelection}>X</button>
-                </span>
+                  <button type="button" className="clear-selection" onClick={clearSelection}>x</button>
+                  <button type="button" className="danger remove-tracks" onClick={deleteSelectedTracks}>Remove</button>
+                </>
               )}
         </div>
       </div>

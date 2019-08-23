@@ -4,6 +4,4 @@ dist
 
 .vscode
 
-# src/config/auth.config.js
-
 debug.log

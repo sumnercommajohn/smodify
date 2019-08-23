@@ -9,11 +9,18 @@ class EditPlaylistDetails extends React.Component {
     this.nameRef.current.focus();
   }
 
-
   handleChange = (e) => {
+    const targetValue = (e.target.type === 'checkbox') ? e.target.checked : e.target.value;
+    const updates = { [e.target.id]: targetValue };
+    this.props.updateDraftPlaylist(updates);
+  }
+
+  handleWorse = (e) => {
     if (e.target.type === 'checkbox') {
-      this.props.updateDraftPlaylist(e.target.id, e.target.checked);
+      const updates = ({ [e.target.id]: e.target.checked });
+      this.props.updateDraftPlaylist(updates);
     } else {
+      const updates = ({ [e.target.id]: e.target.value });
       this.props.updateDraftPlaylist(e.target.id, e.target.value);
     }
   }

@@ -1,7 +1,6 @@
 import React from 'react';
-import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
+import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
@@ -18,7 +17,6 @@ class CurrentPlaylist extends React.Component {
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
       items: [],
-      total: 0,
     },
     nextTracksEndpoint: null,
   }
@@ -31,11 +29,15 @@ class CurrentPlaylist extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { token } = this.props;
-    const { nextTracksEndpoint } = this.state;
+    const { token, updateUserPlaylists } = this.props;
+    const { nextTracksEndpoint, draftPlaylist } = this.state;
 
     if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
       this.getSomeTracks(token, nextTracksEndpoint);
+    }
+    if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
+      console.log('updating draft playlist');
+      updateUserPlaylists(draftPlaylist);
     }
   }
 
@@ -103,6 +105,34 @@ class CurrentPlaylist extends React.Component {
     }));
   }
 
+  // TODO: don't need updateDraftPlaylist, can just update in setState
+  deleteSelectedTracks = async () => {
+    const {
+      token, playlist, setError,
+    } = this.props;
+    const { tracks: { items }, draftPlaylist } = this.state;
+    const selection = items.filter(item => item.isChecked === true);
+    try {
+      const response = await removeSelectedTracks(token, playlist, selection);
+      const remaining = items.filter(item => item.isChecked === false);
+      this.setState(prevState => ({
+        draftPlaylist: {
+          ...prevState.draftPlaylist,
+          snapshot_id: response.snapshot_id,
+          tracks: {
+            ...prevState.draftPlaylist.tracks,
+            total: remaining.length,
+          },
+        },
+        tracks: {
+          items: [...remaining],
+        },
+      }));
+    } catch (error) {
+      setError(error);
+    }
+  }
+
 
   duplicateCurrentPlaylist = async () => {
     const {
@@ -121,11 +151,11 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
-  updateDraftPlaylist = (field, value) => {
+  updateDraftPlaylist = (updatesObject) => {
     this.setState(prevState => ({
       draftPlaylist: {
         ...prevState.draftPlaylist,
-        [field]: value,
+        ...updatesObject,
       },
     }));
   }
@@ -178,7 +208,7 @@ class CurrentPlaylist extends React.Component {
           />
         </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
-        {items
+        {items.length >= 1
         && (
         <PlaylistTracks>
           <TracksToolbar
@@ -186,6 +216,7 @@ class CurrentPlaylist extends React.Component {
             selectAll={this.selectAll}
             allTracksChecked={allTracksChecked}
             numberOfChecked={numberOfChecked}
+            deleteSelectedTracks={this.deleteSelectedTracks}
           />
           <TrackList
             items={items}
