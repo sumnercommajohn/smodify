@@ -156,14 +156,26 @@ main {
     margin-right: 1rem;
     border-radius: 2px;
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.3);
+    }
 
     &.action {
       background: $blue;
+      &:hover {
+        background: darken($blue, 10%);
+      }
     }
 
     &.cancel,
     &.danger {
       background: $red;
+      &:hover {
+        background: saturate($red, 20%);
+      }
     }
 
     &[disabled] {
@@ -233,7 +245,7 @@ main {
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  justify-content: right;
+  // justify-content: right;
 }
 
 .playlist-track-row {
@@ -271,6 +283,26 @@ main {
   top: 0;
   display: flex;
   align-items: center;
+
+  .toolbar-controls {
+    width: 100%;
+    .remove-tracks {
+      float: right;
+    }
+
+    .clear-selection {
+      color: $dark;
+      height: 2rem;
+      width: 2rem;
+      border-radius: 50%;
+      margin: 0 2px;
+
+      &:hover {
+        background: $dark;
+        color: white;
+      }
+    }
+  }
 }
 
 .song-details {
