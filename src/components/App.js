@@ -23,6 +23,7 @@ class App extends React.Component {
       isEditing: false,
     },
     userPlaylists: {
+      isOpen: true,
       items: [],
       nextPlaylistsEndpoint: null,
       needsRefresh: false,
@@ -60,6 +61,15 @@ class App extends React.Component {
     } catch (error) {
       this.setError(error);
     }
+  }
+
+  togglePlaylistMenu = () => {
+    this.setState(prevState => ({
+      userPlaylists: {
+        ...prevState.userPlaylists,
+        isOpen: !prevState.userPlaylists.isOpen,
+      },
+    }));
   }
 
 
@@ -210,6 +220,7 @@ class App extends React.Component {
               setCurrentPlaylist={this.setCurrentPlaylist}
               getUserPlaylists={this.getUserPlaylists}
               sortPlaylists={this.sortPlaylists}
+              togglePlaylistMenu={this.togglePlaylistMenu}
             />
             )
           }
