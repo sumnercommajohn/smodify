@@ -1,3 +1,4 @@
+@import "normalize/normalize.css";
 $dark: rgb(30, 30, 30);
 $light: rgb(255, 255, 255);
 $blue: rgb(112, 155, 235);
@@ -69,9 +70,12 @@ ul {
   position: relative;
   height: 100vh;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  overflow: hidden;
+  // overflow: hidden;
+
+  @media only screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 370px auto;
+  }
 }
 
 main {
@@ -84,31 +88,53 @@ main {
   display: grid;
   align-content: center;
   justify-items: center;
-}
 
-.logo {
-  display: grid;
-  align-content: center;
-  justify-items: center;
-}
+  .logo {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+  }
 
-.logo-tagline {
-  font-weight: 900;
-  margin: 0;
+  .logo-tagline {
+    font-weight: 900;
+    margin: 0;
+  }
 }
 
 .sidebar {
   background-color: $dark;
   color: $light;
   padding: 1rem;
-  min-height: 100vh;
-  min-width: min-content;
   overflow-x: visible;
-  overflow-y: scroll;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    min-height: 100vh;
+    overflow-y: scroll;
+  }
 }
 
 .sidebar-component {
   margin-bottom: 2rem;
+
+  .sidebar-title {
+    display: inline-block;
+  }
+
+  .sidebar-toggle {
+    text-align: left;
+    border: unset;
+    border-bottom: 1px solid #222222;
+    background: none;
+    color: $light;
+    font-weight: 800;
+    font-size: 2rem;
+    padding: 1rem;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
 }
 
 .user-playlists {
@@ -116,30 +142,39 @@ main {
   display: grid;
   grid-template-columns: 1fr;
   font-weight: 500;
-}
+  display: none;
 
-.playlist-button {
-  width: 100%;
-  text-align: left;
-  border: unset;
-  border-bottom: 1px solid #222222;
-  background: none;
-  color: $light;
-  font-weight: 800;
-  font-size: 1.5rem;
-  padding: 1rem 0;
-}
+  @media (min-width: 768px) {
+    display: block;
+  }
 
-.playlist-button span {
-  padding-right: 0.5rem;
-}
+  &.open {
+    display: block;
+  }
 
-.user-playlist-item,
-.list-headers {
-  width: 100%;
-  font-size: 1.5rem;
-  display: grid;
-  grid-template-columns: 3fr 2fr;
+  .playlist-button {
+    width: 100%;
+    text-align: left;
+    border: unset;
+    border-bottom: 1px solid #222222;
+    background: none;
+    color: $light;
+    font-weight: 800;
+    font-size: 2rem;
+    padding: 1rem 0;
+  }
+
+  .playlist-button span {
+    padding-right: 0.5rem;
+  }
+
+  .user-playlist-item,
+  .list-headers {
+    width: 100%;
+    font-size: 2rem;
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+  }
 }
 
 .current-playlist {
@@ -250,7 +285,7 @@ main {
 
 .playlist-track-row {
   width: 100%;
-  font-size: 1.5rem;
+  // font-size: 1.5rem;
   display: flex;
 
   border: 1.5px solid #ffffff;
@@ -315,7 +350,7 @@ main {
 }
 
 .song-title {
-  font-size: 1.9rem;
+  // font-size: 1.9rem;
   font-weight: 700;
   width: 100%;
 
