@@ -1,12 +1,17 @@
+$dark: rgb(30, 30, 30);
+$light: rgb(255, 255, 255);
+$blue: rgb(96, 133, 202);
+$red: rgb(219, 59, 59);
+
 html {
   /* border-box box model allows us to add padding and border to our elements without increasing their size */
   box-sizing: border-box;
   /* A system font stack so things load nice and quick! */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  color: var(--superDark);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
   text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.055);
   font-size: 10px;
+  color: $dark;
 }
 
 /*
@@ -19,10 +24,11 @@ html {
 }
 
 body {
-  background-color: rgba(0, 0, 0, 0.15);
-  background-image: url("./assets/img/3contour.svg");
+  background-color: rgba(0, 0, 0, 0.02);
+  background-image: url("./assets/img/3contour.svg"),
+    linear-gradient(to right, rgba(0, 0, 0, 0.021), rgba(17, 17, 17, 0.027));
   min-height: calc(100vh - 100px);
-  margin: 0 50px;
+  margin: 0;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -45,7 +51,7 @@ h6 {
 
 a {
   text-decoration: none;
-  color: cornflowerblue;
+  color: $blue;
   font-weight: bold;
 }
 
@@ -59,11 +65,197 @@ ul {
 }
 
 .app {
-  grid-template-columns: 1fr;
   height: 100vh;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  overflow: hidden;
+}
+
+main {
+  height: 100vh;
+  padding: 1rem;
+  overflow-y: scroll;
+}
+
+.dashboard {
   display: grid;
   align-content: center;
   justify-items: center;
+}
+
+.logo {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}
+
+.logo-tagline {
+  font-weight: 900;
+  margin: 0;
+}
+
+.sidebar {
+  background-color: $dark;
+  color: $light;
+  padding: 1rem;
+  min-height: 100vh;
+  min-width: min-content;
+  overflow-x: visible;
+  overflow-y: scroll;
+}
+
+.sidebar-component {
+  margin-bottom: 2rem;
+}
+
+.user-playlists {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  font-weight: 500;
+}
+
+.playlist-button {
+  width: 100%;
+  text-align: left;
+  border: unset;
+  border-bottom: 1px solid #222222;
+  background: none;
+  color: $light;
+  font-weight: 800;
+  font-size: 1.5rem;
+  padding: 1rem 0;
+}
+
+.playlist-button span {
+  padding-right: 0.5rem;
+}
+
+.user-playlist-item,
+.list-headers {
+  width: 100%;
+  font-size: 1.5rem;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+}
+
+.current-playlist {
+  padding: 2rem;
+  word-break: break-all;
+
+  button {
+    height: 2.5rem;
+    color: $light;
+    font-weight: bold;
+    border: none;
+    margin-right: 1rem;
+    border-radius: 5px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+
+    &.action {
+      background: $blue;
+    }
+
+    &.cancel,
+    &.danger {
+      background: $red;
+    }
+
+    &[disabled] {
+      background: lightgrey;
+      box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.07);
+    }
+  }
+
+  .playlist-header {
+    display: grid;
+    grid-template-columns: 1fr 7fr;
+    grid-template-rows: auto 1fr;
+    gap: 1rem 2rem;
+
+    .current-playlist-image {
+      width: 200px;
+      box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1);
+      grid-row: span 2;
+    }
+
+    .current-playlist-details,
+    .edit-playlist-form {
+      align-self: start;
+    }
+  }
+}
+
+.current-playlist-title {
+  font-size: 4rem;
+  line-height: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.edit-playlist-form {
+  input.current-playlist-title {
+    display: block;
+    width: 100%;
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    border-bottom: 1px solid $dark;
+    outline: none;
+  }
+
+  .options {
+    display: flex;
+  }
+
+  .options label {
+    margin-right: 1.5rem;
+  }
+
+  .options button {
+    justify-self: right;
+  }
+}
+
+.current-playlist-tracks {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: right;
+  row-gap: 1.5rem;
+}
+
+.playlist-track {
+  width: 100%;
+  font-size: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 23fr;
+  padding: 1rem;
+  gap: 1rem;
+  align-items: center;
+  // background-color: #fbfbfb;
+  // box-shadow: 0 1px 2px rgba(0, 0, 0, 0.057), 0 -1px 2px rgba(0, 0, 0, 0.064);
+}
+
+.song-details {
+  line-height: 1.8rem;
+}
+
+.song-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  width: 100%;
+  display: inline-block;
+}
+
+.song-album {
+  font-style: italic;
+}
+
+.checkbox {
+  margin: 0 auto;
+  justify-self: center;
 }
 
 .app img {
@@ -71,10 +263,19 @@ ul {
 }
 
 .warning {
-  color: indianred;
+  color: $red;
   padding: 20px 0;
 }
 
 .warning p {
   margin: 0;
+  text-align: center;
+}
+
+.text-small {
+  font-size: 1.5rem;
+}
+
+.text-bold {
+  font-weight: bold;
 }
