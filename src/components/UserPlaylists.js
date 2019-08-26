@@ -6,26 +6,26 @@ import SortButton from './SortButton';
 
 class UserPlaylists extends React.Component {
   componentDidMount() {
-    const { token, fetchUserPlaylists, userPlaylists: { items } } = this.props;
+    const { token, getUserPlaylists, userPlaylists: { items } } = this.props;
     if (!items.length) {
-      fetchUserPlaylists(token);
+      getUserPlaylists(token);
     }
   }
 
   componentDidUpdate(prevProps) {
     const {
       token,
-      fetchUserPlaylists,
+      getUserPlaylists,
       userPlaylists: { nextPlaylistsEndpoint, needsRefresh },
     } = this.props;
 
     if (needsRefresh) {
-      fetchUserPlaylists(token);
+      getUserPlaylists(token);
     }
 
     if (nextPlaylistsEndpoint
       && nextPlaylistsEndpoint !== prevProps.userPlaylists.nextPlaylistsEndpoint) {
-      fetchUserPlaylists(token, nextPlaylistsEndpoint);
+      getUserPlaylists(token, nextPlaylistsEndpoint);
     }
   }
 

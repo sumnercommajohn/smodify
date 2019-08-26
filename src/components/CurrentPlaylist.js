@@ -2,11 +2,17 @@ import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks } from '../helpers/spotifyHelpers';
 import TrackItem from './TrackItem';
+import { PlaylistHeader } from './PlaylistHeader';
+import EditPlaylistDetails from './EditPlaylistDetails';
+import { PlaylistDetails } from './PlaylistDetails';
+import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
 
 class CurrentPlaylist extends React.Component {
   state = {
-    errorMessage: '',
+    warning: '',
+    draftPlaylist: this.props.playlist,
+    ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
       items: [],
       total: 0,
@@ -33,6 +39,7 @@ class CurrentPlaylist extends React.Component {
 
 
   getSomeTracks = async (token, endpoint) => {
+    const { setError } = this.props;
     try {
       const tracksObject = await fetchSomeTracks(token, endpoint);
       this.setState((prevState) => {
@@ -40,7 +47,6 @@ class CurrentPlaylist extends React.Component {
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => { item.key = i + Date.now(); });
         return {
-          errorMessage: '',
           tracks: {
             ...tracksObject,
             items: [...existingTracks, ...fetchedTracks],
@@ -48,12 +54,9 @@ class CurrentPlaylist extends React.Component {
           nextTracksEndpoint: tracksObject.next,
         };
       });
+      setError();
     } catch (error) {
-      this.setState({
-        currentPlaylist: {
-          errorMessage: error.message,
-        },
-      });
+      setError(error);
     }
   }
 
@@ -61,7 +64,7 @@ class CurrentPlaylist extends React.Component {
     const prevSelection = [...this.state.selection];
     if (prevSelection.length > 99) {
       this.setState({
-        errorMessage: 'Unable to select more than 100 items.',
+        warning: 'Unable to select more than 100 items.',
       });
       return;
     }
@@ -75,44 +78,76 @@ class CurrentPlaylist extends React.Component {
 
   duplicateCurrentPlaylist = async () => {
     const {
-      token, userId, playlist, setCurrentPlaylist, updateUserPlaylists, refreshPlaylists,
+      token, userId, playlist,
+      setCurrentPlaylist, setError, toggleEditPlaylist, updateUserPlaylists, refreshPlaylists,
     } = this.props;
     const { tracks } = this.state;
     try {
       const newPlaylist = await clonePlaylist(token, userId, playlist, tracks);
-      setCurrentPlaylist(newPlaylist);
       updateUserPlaylists(newPlaylist);
+      setCurrentPlaylist(newPlaylist);
+      toggleEditPlaylist();
     } catch (error) {
-      this.setState({
-        errorMessage: error.message,
-      });
+      setError(error);
     }
     refreshPlaylists();
   }
 
+  updateDraftPlaylist = (field, value) => {
+    this.setState(prevState => ({
+      draftPlaylist: {
+        ...prevState.draftPlaylist,
+        [field]: value,
+      },
+    }));
+  }
+
+  resetDraftPlaylist = () => {
+    this.setState({
+      draftPlaylist: this.props.playlist,
+    });
+  }
+
   render() {
     const {
-      playlist: {
-        name, images, owner: { display_name: ownerName }, tracks: { total },
-      },
+      errorMessage,
+      isEditing,
+      playlist, playlist: { images },
+      updateUserPlaylists,
+      deletePlaylist,
+      toggleEditPlaylist,
+      token,
     } = this.props;
-    const { errorMessage, tracks: { items } } = this.state;
+    const {
+      draftPlaylist, tracks: { items }, ownedByUser,
+    } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
+
     return (
       <main className="current-playlist">
-        <section className="current-playlist-header">
-          <img className="current-playlist-image" src={imageSrc} alt="album artwork" />
-          <div className="current-playlist-details">
-            <div className="current-playlist-buttons">
-              <button type="button" className="copy-button" onClick={this.duplicateCurrentPlaylist}>
-              Clone Playlist
-              </button>
-            </div>
-            <h3 className="current-playlist-title"> {name} </h3>
-            <h4>By {ownerName}</h4>
-            <span>{total} tracks</span>
-          </div>
-        </section>
+
+        <PlaylistHeader imageSrc={imageSrc}>
+          {isEditing
+            ? (
+              <EditPlaylistDetails
+                draftPlaylist={draftPlaylist}
+                updateDraftPlaylist={this.updateDraftPlaylist}
+                resetDraftPlaylist={this.resetDraftPlaylist}
+                updateUserPlaylists={updateUserPlaylists}
+                token={token}
+                toggleEditPlaylist={toggleEditPlaylist}
+              />
+            )
+            : <PlaylistDetails playlist={playlist} />
+           }
+          <PlaylistButtons
+            duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+            deletePlaylist={deletePlaylist}
+            isEditing={isEditing}
+            ownedByUser={ownedByUser}
+            toggleEditPlaylist={toggleEditPlaylist}
+          />
+        </PlaylistHeader>
         {errorMessage && <ErrorMessage message={errorMessage} />}
         <ul className="current-playlist-tracks">
           {items

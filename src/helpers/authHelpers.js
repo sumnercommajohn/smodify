@@ -1,14 +1,11 @@
-export const getAuthURL = (showDialog = false) => {
+export const getAuthURL = ({ clientId, redirectUri }, showDialog = false) => {
   const authEndpoint = 'https://accounts.spotify.com/authorize';
-  const clientId = '10a41ddfc787418f9ef272f0bf886e86';
-  const redirectUri = 'http://localhost:8080/';
+  const responseType = 'token';
   const scopes = [
     'playlist-read-private',
     'playlist-modify-public',
     'playlist-modify-private',
   ];
-  const responseType = 'token';
-
   const authURL = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&response_type=${responseType}&show_dialog=${showDialog}`;
   return authURL;
 };
@@ -48,5 +45,8 @@ export const getTokenFromLocal = () => {
 
 export const checkURIforError = () => {
   const query = window.location.search.substring(1);
-  return query.includes('error');
+  if (query.includes('error')) {
+    return ({ message: 'Spotify profile not connected' });
+  }
+  return false;
 };
