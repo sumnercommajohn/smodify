@@ -1,4 +1,4 @@
-@import "normalize/normalize.css";
+@import "./normalize.css";
 $dark: rgb(30, 30, 30);
 $light: rgb(255, 255, 255);
 $blue: rgb(112, 155, 235);
@@ -26,7 +26,7 @@ html {
 
 body {
   background-color: rgba(0, 0, 0, 0.02);
-  background-image: url("./assets/img/3contour.svg"),
+  background-image: url("../assets/img/3contour.svg"),
     linear-gradient(to right, rgba(0, 0, 0, 0.021), rgba(17, 17, 17, 0.027));
   min-height: calc(100vh - 100px);
   margin: 0;

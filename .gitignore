@@ -7,3 +7,5 @@ dist
 debug.log
 
 public
+
+src/config/auth.config.js
