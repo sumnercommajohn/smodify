@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlaylistItem } from './PlaylistItem';
+import PlaylistItem from './PlaylistItem';
 import { ErrorMessage } from './ErrorMessage';
 import SortButton from './SortButton';
 
@@ -32,17 +32,17 @@ class UserPlaylists extends React.Component {
 
   render() {
     const {
-      errorMessage,
       setCurrentPlaylist,
       sortPlaylists,
-      userPlaylists: { items },
+      userPlaylists: { items, isOpen },
+      togglePlaylistMenu,
     } = this.props;
 
     return (
       <div className="sidebar-component">
-        {errorMessage && <ErrorMessage message={errorMessage} />}
-        <h3>Playlists</h3>
-        <ul className="user-playlists">
+        <h3 className="sidebar-title">Playlists</h3>
+        <button onClick={togglePlaylistMenu} type="button" className="sidebar-toggle">{isOpen ? '︾' : ' ︽'}</button>
+        <ul className={`user-playlists${isOpen ? ' open' : ''}`}>
           <div className="list-headers">
             <SortButton sortFunction={sortPlaylists} sortBy="name">Title</SortButton>
             <SortButton sortFunction={sortPlaylists} sortBy="total">Tracks</SortButton>
@@ -53,6 +53,7 @@ class UserPlaylists extends React.Component {
                 key={playlist.id}
                 playlist={playlist}
                 setCurrentPlaylist={setCurrentPlaylist}
+                togglePlaylistMenu={togglePlaylistMenu}
               />
             ))
             : <p>Loading...</p>}

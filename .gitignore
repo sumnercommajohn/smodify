@@ -4,6 +4,8 @@ dist
 
 .vscode
 
-src/config/auth.config.js
-
 debug.log
+
+public
+
+src/config/auth.config.js
