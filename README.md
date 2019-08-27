@@ -30,7 +30,7 @@ You can create a production build of Smodify by running `npm run build` in the c
 ## Deploying
 Serving this app from anywhere other than the two localhost ports listed above requires you to get your own Spotify Client ID. You can do this by creating your own Spotify project at [Spotify for Developers](https://developer.spotify.com/dashboard/). This also requires you to have a Spotify account. 
 
-Once you have created a Project and received a Spotify client ID, open your project in the Spotify Developer Dashboard, and choose 'Edit Settings'. Under 'Redirect URIs', enter the URI where your deployment will be served from. Then, in your folder, copy your Spotify Client ID into `src/config/auth.config.js`:
+Once you have created a Project and received a Spotify client ID, open your project in the Spotify Developer Dashboard, and choose 'Edit Settings'. Under 'Redirect URIs', enter the URI where your deployment will be served from. Then, in your local project folder, copy your Spotify Client ID into `src/config/auth.config.js`:
 
 ```javascript
 export const config = {
@@ -39,7 +39,7 @@ export const config = {
 };
 ```
 
-Once you've done this, you Spotify should be able to redirect users back to your deployment after connecting their Spotify account to your client. 
+Once you've done this, run the Build script again and Spotify should be able to redirect users back to your deployment after connecting their Spotify account to your client. 
 
 ## Deploying to Now
 This project is configured to easily deploy to [Zeit's Now platform](https://zeit.co/). 
