@@ -40,8 +40,8 @@ class UserPlaylists extends React.Component {
 
     return (
       <div className="sidebar-component">
-        <h3 className="sidebar-title">Playlists</h3>
-        <button onClick={togglePlaylistMenu} type="button" className="sidebar-toggle">{isOpen ? '︾' : ' ︽'}</button>
+        <h3 className="sidebar-title">Playlists<button onClick={togglePlaylistMenu} type="button" className="sidebar-toggle">{isOpen ? '︽' : '︾'}</button></h3>
+
         <ul className={`user-playlists${isOpen ? ' open' : ''}`}>
           <div className="list-headers">
             <SortButton sortFunction={sortPlaylists} sortBy="name">Title</SortButton>
