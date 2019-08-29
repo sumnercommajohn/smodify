@@ -3,7 +3,9 @@ import TrackItem from './TrackItem';
 
 class TrackList extends React.Component {
   render() {
-    const { items, toggleSelection, toggleChecked } = this.props;
+    const {
+      items, toggleSelection, toggleChecked, ownedByUser,
+    } = this.props;
     return (
       <ul className="tracklist">
         {items
@@ -17,6 +19,7 @@ class TrackList extends React.Component {
           name={trackItem.track.name}
           toggleSelection={toggleSelection}
           toggleChecked={toggleChecked}
+          ownedByUser={ownedByUser}
         />
       ))}
       </ul>

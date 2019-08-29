@@ -8,7 +8,6 @@ export const Welcome = (props) => {
       <h3>Welcome, {firstName}
         <span className="text-small"><LoginLink dialog message=" (Not You?)" /></span>
       </h3>
-
     </div>
   );
 };

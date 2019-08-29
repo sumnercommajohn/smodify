@@ -32,7 +32,7 @@ class TracksToolbar extends React.Component {
               && (
                 <>
                   {this.printNumberOfChecked()}
-                  <button type="button" className="clear-selection" onClick={clearSelection}>x</button>
+                  <button type="button" className="clear-selection" onClick={clearSelection}>X</button>
                   <button type="button" className="danger remove-tracks" onClick={deleteSelectedTracks}>Remove</button>
                 </>
               )}

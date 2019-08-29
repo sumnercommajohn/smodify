@@ -211,6 +211,8 @@ class CurrentPlaylist extends React.Component {
         {items.length >= 1
         && (
         <PlaylistTracks>
+          {ownedByUser
+          && (
           <TracksToolbar
             clearSelection={this.clearSelection}
             selectAll={this.selectAll}
@@ -218,7 +220,10 @@ class CurrentPlaylist extends React.Component {
             numberOfChecked={numberOfChecked}
             deleteSelectedTracks={this.deleteSelectedTracks}
           />
+          )
+        }
           <TrackList
+            ownedByUser={ownedByUser}
             items={items}
             toggleSelection={this.toggleSelection}
             toggleChecked={this.toggleChecked}
