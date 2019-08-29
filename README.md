@@ -44,4 +44,4 @@ Once you've done this, run the Build script again and Spotify should be able to 
 ## Deploying to Now
 This project is configured to easily deploy to [Zeit's Now platform](https://zeit.co/). 
 
-To deploy to Now, simply install the Now CLI globally with `npm i -g now`. Once the CLI is installed, login to your Zeit account with `now login`. Once you've logged in, you can create a deployment with the command `now` for a staging deployment or `now --prod` for a production deployment.
+To deploy to Now, simply install the [Now CLI](https://github.com/zeit/now) globally with `npm i -g now`. Once the CLI is installed, login to your Zeit account with `now login`. Once you've logged in, you can create a deployment with the command `now` for a staging deployment or `now --prod` for a production deployment.
