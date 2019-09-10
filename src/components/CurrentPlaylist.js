@@ -69,14 +69,10 @@ class CurrentPlaylist extends React.Component {
 
   toggleChecked = (uid, checkedState) => {
     this.setState((prevState) => {
-      const items = [...prevState.tracks.items];
-      const targetIndex = items.findIndex(item => item.uid === uid);
-      items[targetIndex].isChecked = checkedState;
+      const targetIndex = prevState.tracks.items.findIndex(item => item.uid === uid);
+      prevState.tracks.items[targetIndex].isChecked = checkedState;
       return ({
-        tracks: {
-          ...prevState.tracks,
-          items: [...items],
-        },
+        tracks: prevState.tracks,
       });
     });
   }

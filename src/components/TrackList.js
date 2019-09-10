@@ -7,7 +7,7 @@ class TrackList extends React.Component {
     searchString: '',
   }
 
-  filterTracks = (e) => {
+  setSearchString = (e) => {
     const searchString = e.target.value;
     this.setState({ searchString });
   }
@@ -21,7 +21,7 @@ class TrackList extends React.Component {
     return (
       <ul className="tracklist">
         <div className="filter-bar">
-          <input onChange={this.filterTracks} type="text" />
+          <input onChange={this.setSearchString} type="text" />
         </div>
         {itemsToRender
       && itemsToRender.map(trackItem => (
