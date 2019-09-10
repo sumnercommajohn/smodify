@@ -110,7 +110,7 @@ class CurrentPlaylist extends React.Component {
     const {
       token, playlist, setError,
     } = this.props;
-    const { tracks: { items }, draftPlaylist } = this.state;
+    const { tracks: { items } } = this.state;
     const selection = items.filter(item => item.isChecked === true);
     try {
       const response = await removeSelectedTracks(token, playlist, selection);
@@ -128,6 +128,7 @@ class CurrentPlaylist extends React.Component {
           items: [...remaining],
         },
       }));
+      setError();
     } catch (error) {
       setError(error);
     }

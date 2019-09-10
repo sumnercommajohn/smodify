@@ -1,15 +1,30 @@
 import React from 'react';
 import TrackItem from './TrackItem';
+import { matchTracks } from '../helpers/otherHelpers';
 
 class TrackList extends React.Component {
+  state = {
+    searchString: '',
+  }
+
+  filterTracks = (e) => {
+    const searchString = e.target.value;
+    this.setState({ searchString });
+  }
+
   render() {
     const {
-      items, toggleSelection, toggleChecked, ownedByUser,
+      items, toggleChecked, ownedByUser,
     } = this.props;
+    const { searchString } = this.state;
+    const itemsToRender = matchTracks(searchString, items);
     return (
       <ul className="tracklist">
-        {items
-      && items.map(trackItem => (
+        <div className="filter-bar">
+          <input onChange={this.filterTracks} type="text" />
+        </div>
+        {itemsToRender
+      && itemsToRender.map(trackItem => (
         <TrackItem
           key={trackItem.uid}
           uid={trackItem.uid}
@@ -17,7 +32,6 @@ class TrackList extends React.Component {
           album={trackItem.track.album}
           artists={trackItem.track.artists}
           name={trackItem.track.name}
-          toggleSelection={toggleSelection}
           toggleChecked={toggleChecked}
           ownedByUser={ownedByUser}
         />
