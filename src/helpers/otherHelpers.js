@@ -6,3 +6,10 @@ export function matchTracks(searchWord, items) {
     || item.track.artists[0].name.match(regex);
   });
 }
+
+export function arrayToObject(array, keyField) {
+  return array.reduce((obj, item) => {
+    obj[item[keyField]] = item;
+    return obj;
+  }, {});
+}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyHelpers';
+import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyAPIhelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../helpers/authHelpers';
+import { arrayToObject } from '../helpers/otherHelpers';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
@@ -24,7 +25,7 @@ class App extends React.Component {
     },
     userPlaylists: {
       isOpen: true,
-      items: [],
+      itemsObject: {},
       nextPlaylistsEndpoint: null,
       needsRefresh: false,
     },
@@ -74,54 +75,22 @@ class App extends React.Component {
 
 
   getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
-    const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
-      this.setState((prevState) => {
-        const existingItems = needsRefresh
-          ? []
-          : prevState.userPlaylists.items;
-        return {
-          userPlaylists: {
-            items: [...existingItems, ...playlistsObject.items],
-            nextPlaylistsEndpoint: playlistsObject.next,
-            needsRefresh: false,
-          },
-        };
-      });
+      const itemsObject = arrayToObject(playlistsObject.items, 'id');
+      this.setState(prevState => ({
+        userPlaylists: {
+          itemsObject: { ...prevState.userPlaylists.itemsObject, ...itemsObject },
+          nextPlaylistsEndpoint: playlistsObject.next,
+          needsRefresh: false,
+          isOpen: prevState.userPlaylists.isOpen,
+        },
+      }));
       this.setError();
     } catch (error) {
       this.setError(error);
     }
   }
-
-  sortPlaylists = (sortBy, sortDescending = false) => {
-    const { items } = this.state.userPlaylists;
-    const playlistsMap = items.map((playlist, i) => ({
-      index: i,
-      name: playlist.name.toLowerCase(),
-      total: playlist.tracks.total,
-    }));
-    playlistsMap.sort((a, b) => {
-      if (a[`${sortBy}`] > b[`${sortBy}`]) {
-        return 1;
-      }
-      if (a[`${sortBy}`] < b[`${sortBy}`]) {
-        return -1;
-      }
-      return 0;
-    });
-    if (sortDescending) {
-      playlistsMap.reverse();
-    }
-    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
-    this.setState(prevstate => ({
-      userPlaylists: {
-        ...prevstate.userPlaylists,
-        items: [...playlistsSorted],
-      },
-    }));
-  };
 
   refreshPlaylists = () => {
     this.setState(prevstate => ({
@@ -156,20 +125,23 @@ class App extends React.Component {
   }
 
   deletePlaylist = async () => {
-    const { token, currentPlaylist: { id }, userPlaylists: { items } } = this.state;
-    const updatedPlaylists = items.filter(item => item.id !== id);
+    const { token, currentPlaylist: { id } } = this.state;
     try {
       await unfollowPlaylist(token, id);
-      this.setState(prevState => ({
-        currentPlaylist: {
-          id: '',
-          isEditing: false,
-        },
-        userPlaylists: {
-          ...prevState.userPlaylists,
-          items: [...updatedPlaylists],
-        },
-      }));
+      this.setState((prevState) => {
+        const updatedPlaylists = { ...prevState.userPlaylists.itemsObject };
+        delete updatedPlaylists[id];
+        return ({
+          currentPlaylist: {
+            id: '',
+            isEditing: false,
+          },
+          userPlaylists: {
+            ...prevState.userPlaylists,
+            itemsObject: { ...updatedPlaylists },
+          },
+        });
+      });
       this.setError();
     } catch (error) {
       this.setError();
@@ -177,19 +149,16 @@ class App extends React.Component {
   }
 
   updateUserPlaylists = (playlist) => {
-    const playlistItems = [...this.state.userPlaylists.items];
-    const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
-    if (targetIndex === -1) {
-      playlistItems.unshift(playlist);
-    } else {
-      playlistItems[targetIndex] = { ...playlist };
-    }
-    this.setState(prevState => ({
-      userPlaylists: {
-        ...prevState.userPlaylists,
-        items: [...playlistItems],
-      },
-    }));
+    this.setState((prevState) => {
+      const playlistItems = { ...prevState.userPlaylists.itemsObject };
+      playlistItems[playlist.id] = playlist;
+      return ({
+        userPlaylists: {
+          ...prevState.userPlaylists,
+          itemsObject: { ...playlistItems },
+        },
+      });
+    });
     this.setError();
   }
 
@@ -200,11 +169,10 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
-      userPlaylists: { items },
+      userPlaylists: { itemsObject },
       errorMessage,
     } = this.state;
-    const playlist = items
-      .find(playlistItem => (playlistItem.id === currentPlaylist.id));
+    const playlist = itemsObject[currentPlaylist.id];
     return (
       <div className="app">
         <Sidebar>

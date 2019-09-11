@@ -5,11 +5,15 @@ import SortButton from './SortButton';
 
 
 class UserPlaylists extends React.Component {
+  state = {
+    sortBy: '',
+    sortDescending: true,
+  }
+
+
   componentDidMount() {
-    const { token, getUserPlaylists, userPlaylists: { items } } = this.props;
-    if (!items.length) {
-      getUserPlaylists(token);
-    }
+    const { token, getUserPlaylists } = this.props;
+    getUserPlaylists(token);
   }
 
   componentDidUpdate(prevProps) {
@@ -29,14 +33,43 @@ class UserPlaylists extends React.Component {
     }
   }
 
+  setSort = (sortBy, sortDescending) => {
+    this.setState({ sortBy, sortDescending });
+  }
+
+
+  convertToSortedArray = (itemsObject) => {
+    const { sortBy, sortDescending } = this.state;
+    const playlistsArray = Object.values(itemsObject);
+    if (!sortBy) { return playlistsArray; }
+    const playlistsMap = playlistsArray.map(playlist => ({
+      id: playlist.id,
+      name: playlist.name.toLowerCase(),
+      total: playlist.tracks.total,
+    }));
+    playlistsMap.sort((a, b) => {
+      if (a[`${sortBy}`] > b[`${sortBy}`]) {
+        return 1;
+      }
+      if (a[`${sortBy}`] < b[`${sortBy}`]) {
+        return -1;
+      }
+      return 0;
+    });
+    if (sortDescending) {
+      playlistsMap.reverse();
+    }
+    const playlistsArraySorted = playlistsMap.map(mapItem => itemsObject[mapItem.id]);
+    return playlistsArraySorted;
+  };
 
   render() {
     const {
       setCurrentPlaylist,
-      sortPlaylists,
-      userPlaylists: { items, isOpen },
+      userPlaylists: { itemsObject, isOpen },
       togglePlaylistMenu,
     } = this.props;
+    const playlistItems = this.convertToSortedArray(itemsObject);
 
     return (
       <div className="sidebar-component">
@@ -44,11 +77,11 @@ class UserPlaylists extends React.Component {
 
         <ul className={`user-playlists${isOpen ? ' open' : ''}`}>
           <div className="list-headers">
-            <SortButton sortFunction={sortPlaylists} sortBy="name">Title</SortButton>
-            <SortButton sortFunction={sortPlaylists} sortBy="total">Tracks</SortButton>
+            <SortButton sortFunction={this.setSort} sortBy="name">Title</SortButton>
+            <SortButton sortFunction={this.setSort} sortBy="total">Tracks</SortButton>
           </div>
-          {items.length
-            ? items.map(playlist => (
+          {playlistItems.length >= 1
+            ? playlistItems.map(playlist => (
               <PlaylistItem
                 key={playlist.id}
                 playlist={playlist}

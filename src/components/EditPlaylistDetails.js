@@ -1,5 +1,5 @@
 import React from 'react';
-import { changePlaylistDetails } from '../helpers/spotifyHelpers';
+import { changePlaylistDetails } from '../helpers/spotifyAPIhelpers';
 
 
 class EditPlaylistDetails extends React.Component {

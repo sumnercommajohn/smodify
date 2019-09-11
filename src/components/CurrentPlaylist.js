@@ -1,6 +1,6 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyHelpers';
+import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyAPIhelpers';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
