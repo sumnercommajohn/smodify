@@ -169,7 +169,7 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
-      userPlaylists: { itemsObject },
+      userPlaylists: { itemsObject, isOpen },
       errorMessage,
     } = this.state;
     const playlist = itemsObject[currentPlaylist.id];
@@ -177,7 +177,7 @@ class App extends React.Component {
       <div className="app">
         <Sidebar>
           { user.name
-            ? <Welcome user={user.name} />
+            ? <Welcome name={user.name} isOpen={isOpen} />
             : <LoginLink message="Login to Spotify to get started." />
             }
           { user.name

@@ -118,6 +118,22 @@ main {
 .sidebar-component {
   margin-bottom: 2rem;
 
+  &.welcome {
+    display: none;
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+
+    &.open {
+      display: block;
+    }
+  }
+
+  &:last-child {
+    margin-bottom: 1rem;
+  }
+
   .sidebar-title {
     position: sticky;
     top: 0;
@@ -144,7 +160,7 @@ main {
 
 .user-playlists {
   margin: 0 auto;
-  display: grid;
+  // display: grid;
   grid-template-columns: 1fr;
   font-weight: 500;
   display: none;
