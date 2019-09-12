@@ -1,6 +1,7 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyAPIhelpers';
+import { arrayToObject } from '../helpers/otherHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
@@ -17,6 +18,7 @@ class CurrentPlaylist extends React.Component {
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
     tracks: {
       items: [],
+      itemsObject: {},
     },
     nextTracksEndpoint: null,
   }
@@ -36,7 +38,6 @@ class CurrentPlaylist extends React.Component {
       this.getSomeTracks(token, nextTracksEndpoint);
     }
     if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
-      console.log('updating draft playlist');
       updateUserPlaylists(draftPlaylist);
     }
   }
@@ -48,15 +49,18 @@ class CurrentPlaylist extends React.Component {
       const tracksObject = await fetchSomeTracks(token, endpoint);
       this.setState((prevState) => {
         const existingTracks = prevState.tracks.items || [];
+        const existingTracksObject = prevState.tracks.itemsObject;
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => {
           item.uid = i + Date.now();
           item.isChecked = false;
         });
+        const fetchedTracksObject = arrayToObject(fetchedTracks, 'uid');
         return {
           tracks: {
             ...tracksObject,
             items: [...existingTracks, ...fetchedTracks],
+            itemsObject: { ...existingTracksObject, ...fetchedTracksObject },
           },
           nextTracksEndpoint: tracksObject.next,
         };
@@ -148,11 +152,11 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
-  updateDraftPlaylist = (updatesObject) => {
+  updateDraftPlaylist = (updatedFieldsObject) => {
     this.setState(prevState => ({
       draftPlaylist: {
         ...prevState.draftPlaylist,
-        ...updatesObject,
+        ...updatedFieldsObject,
       },
     }));
   }
