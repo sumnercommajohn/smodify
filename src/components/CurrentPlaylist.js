@@ -3,10 +3,11 @@ import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyAPIhelpers';
 import { matchTracks } from '../helpers/otherHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
-import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
 import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
+import { FilterBar } from './FilterBar';
+import EditPlaylistDetails from './EditPlaylistDetails';
 import PlaylistTracks from './PlaylistTracks';
 import TracksToolbar from './TracksToolbar';
 import TrackList from './TrackList';
@@ -72,7 +73,14 @@ class CurrentPlaylist extends React.Component {
   }
 
   setSearchString = (e) => {
+    console.log(e);
     const searchString = e.target.value;
+    this.setState({ searchString });
+  }
+
+  clearSearchString = () => {
+    console.log('clearing');
+    const searchString = '';
     this.setState({ searchString });
   }
 
@@ -82,7 +90,10 @@ class CurrentPlaylist extends React.Component {
       const targetIndex = items.findIndex(item => item.uid === uid);
       items[targetIndex].isChecked = checkedState;
       return ({
-        tracks: prevState.tracks,
+        tracks: {
+          ...prevState.tracks,
+          items,
+        },
       });
     });
   }
@@ -219,18 +230,25 @@ class CurrentPlaylist extends React.Component {
         {items.length >= 1
         && (
         <PlaylistTracks>
-          {ownedByUser
+          <div className="track-tools">
+            {ownedByUser
           && (
-          <TracksToolbar
-            clearSelection={this.clearSelection}
-            toggleCheckedAll={this.toggleCheckedAll}
-            deleteSelectedTracks={this.deleteSelectedTracks}
-            setSearchString={this.setSearchString}
-            numberOfChecked={numberOfChecked}
-            allTracksChecked={allTracksChecked}
-          />
+            <TracksToolbar
+              clearSelection={this.clearSelection}
+              toggleCheckedAll={this.toggleCheckedAll}
+              deleteSelectedTracks={this.deleteSelectedTracks}
+              setSearchString={this.setSearchString}
+              numberOfChecked={numberOfChecked}
+              allTracksChecked={allTracksChecked}
+            />
           )
-        }
+          }
+            <FilterBar
+              searchString={searchString}
+              setSearchString={this.setSearchString}
+              clearSearchString={this.clearSearchString}
+            />
+          </div>
           <TrackList
             ownedByUser={ownedByUser}
             filteredItems={filteredItems}

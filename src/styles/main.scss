@@ -306,7 +306,6 @@ main {
 .playlist-track-row {
   width: 100%;
   display: flex;
-
   border: 1.5px solid #ffffff;
   z-index: 1;
 
@@ -327,14 +326,16 @@ main {
     background-color: #fcfcfc;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.178), 0 0px 5px rgba(0, 0, 0, 0.137);
     border: 1.5px solid scale-color($blue, $alpha: -50%);
-    // z-index: 2;
   }
 }
 
-.tracks-toolbar {
-  border-bottom: 1px solid #a1a1a162;
+.track-tools {
   position: sticky;
   top: 0;
+}
+
+.tracks-toolbar {
+  border-bottom: 1px solid #a1a1a1;
   display: flex;
   align-items: center;
 
@@ -345,7 +346,8 @@ main {
       float: right;
     }
 
-    .clear-selection {
+    .clear-selection,
+    .clear-filter {
       display: inline;
       color: $dark;
       background: $light;
@@ -364,8 +366,24 @@ main {
 }
 
 .filter-bar {
+  position: relative;
   input {
     width: 100%;
+  }
+  .clear-filter {
+    display: inline;
+    position: absolute;
+    right: 0;
+    color: $dark;
+    background: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    padding: 0 0.7rem;
+    box-shadow: none;
+
+    &:hover {
+      box-shadow: none;
+    }
   }
 }
 

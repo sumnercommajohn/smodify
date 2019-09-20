@@ -1,4 +1,5 @@
 export function matchTracks(searchString, items) {
+  console.log('matching tracks!');
   return items.filter((item) => {
     const regex = new RegExp(searchString, 'gi');
     return item.track.name.match(regex)
