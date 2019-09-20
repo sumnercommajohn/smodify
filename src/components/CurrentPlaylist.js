@@ -198,7 +198,7 @@ class CurrentPlaylist extends React.Component {
       draftPlaylist, tracks: { items }, ownedByUser, searchString,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
-    const filteredItems = matchTracks(searchString, items);
+    const filteredItems = searchString.length > 0 ? matchTracks(searchString, items) : items;
     const allTracksChecked = filteredItems.every(item => item.isChecked);
     const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
