@@ -1,7 +1,7 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
 import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyAPIhelpers';
-import { arrayToObject } from '../helpers/otherHelpers';
+import { matchTracks } from '../helpers/otherHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
 import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
@@ -16,9 +16,9 @@ class CurrentPlaylist extends React.Component {
   state = {
     draftPlaylist: this.props.playlist,
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
+    searchString: '',
     tracks: {
       items: [],
-      itemsObject: {},
     },
     nextTracksEndpoint: null,
   }
@@ -34,9 +34,12 @@ class CurrentPlaylist extends React.Component {
     const { token, updateUserPlaylists } = this.props;
     const { nextTracksEndpoint, draftPlaylist } = this.state;
 
+    // continues loading tracks if playlist contains more than request limit (100 tracks)
     if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
       this.getSomeTracks(token, nextTracksEndpoint);
     }
+
+    // updates the number of tracks as displayed in UserPlaylists
     if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
       updateUserPlaylists(draftPlaylist);
     }
@@ -49,18 +52,15 @@ class CurrentPlaylist extends React.Component {
       const tracksObject = await fetchSomeTracks(token, endpoint);
       this.setState((prevState) => {
         const existingTracks = prevState.tracks.items || [];
-        const existingTracksObject = prevState.tracks.itemsObject;
         const fetchedTracks = tracksObject.items;
         fetchedTracks.forEach((item, i) => {
           item.uid = i + Date.now();
           item.isChecked = false;
         });
-        const fetchedTracksObject = arrayToObject(fetchedTracks, 'uid');
         return {
           tracks: {
             ...tracksObject,
             items: [...existingTracks, ...fetchedTracks],
-            itemsObject: { ...existingTracksObject, ...fetchedTracksObject },
           },
           nextTracksEndpoint: tracksObject.next,
         };
@@ -71,14 +71,32 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
+  setSearchString = (e) => {
+    const searchString = e.target.value;
+    this.setState({ searchString });
+  }
+
   toggleChecked = (uid, checkedState) => {
     this.setState((prevState) => {
-      const targetIndex = prevState.tracks.items.findIndex(item => item.uid === uid);
-      prevState.tracks.items[targetIndex].isChecked = checkedState;
+      const items = [...prevState.tracks.items];
+      const targetIndex = items.findIndex(item => item.uid === uid);
+      items[targetIndex].isChecked = checkedState;
       return ({
         tracks: prevState.tracks,
       });
     });
+  }
+
+  toggleCheckedAll = (allTracksChecked = false) => {
+    const { searchString, tracks: { items } } = this.state;
+    const filteredItems = matchTracks(searchString, items);
+    this.setState(prevState => ({
+      ...prevState.tracks,
+      items: filteredItems.map((item) => {
+        item.isChecked = !allTracksChecked;
+        return item;
+      }),
+    }));
   }
 
   clearSelection = () => {
@@ -93,19 +111,7 @@ class CurrentPlaylist extends React.Component {
     }));
   }
 
-  selectAll = () => {
-    this.setState(prevState => ({
-      tracks: {
-        ...prevState.tracks,
-        items: (prevState.tracks.items.map((item) => {
-          item.isChecked = true;
-          return item;
-        })),
-      },
-    }));
-  }
 
-  // TODO: don't need updateDraftPlaylist, can just update in setState
   deleteSelectedTracks = async () => {
     const {
       token, playlist, setError,
@@ -178,10 +184,11 @@ class CurrentPlaylist extends React.Component {
       token,
     } = this.props;
     const {
-      draftPlaylist, tracks: { items }, ownedByUser,
+      draftPlaylist, tracks: { items }, ownedByUser, searchString,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
-    const allTracksChecked = items.every(item => item.isChecked);
+    const filteredItems = matchTracks(searchString, items);
+    const allTracksChecked = filteredItems.every(item => item.isChecked);
     const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
       <main className="current-playlist">
@@ -216,16 +223,17 @@ class CurrentPlaylist extends React.Component {
           && (
           <TracksToolbar
             clearSelection={this.clearSelection}
-            selectAll={this.selectAll}
-            allTracksChecked={allTracksChecked}
-            numberOfChecked={numberOfChecked}
+            toggleCheckedAll={this.toggleCheckedAll}
             deleteSelectedTracks={this.deleteSelectedTracks}
+            setSearchString={this.setSearchString}
+            numberOfChecked={numberOfChecked}
+            allTracksChecked={allTracksChecked}
           />
           )
         }
           <TrackList
             ownedByUser={ownedByUser}
-            items={items}
+            filteredItems={filteredItems}
             toggleSelection={this.toggleSelection}
             toggleChecked={this.toggleChecked}
           />
