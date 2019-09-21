@@ -66,10 +66,10 @@ class UserPlaylists extends React.Component {
   render() {
     const {
       setCurrentPlaylist,
-      userPlaylists: { itemsObject, isOpen },
+      userPlaylists: { items, isOpen },
       togglePlaylistMenu,
     } = this.props;
-    const playlistItems = this.convertToSortedArray(itemsObject);
+    const playlistItems = this.convertToSortedArray(items);
 
     return (
       <div className="sidebar-component">

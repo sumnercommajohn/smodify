@@ -338,6 +338,7 @@ main {
   border-bottom: 1px solid #a1a1a1;
   display: flex;
   align-items: center;
+  font-size: 1.5rem;
 
   .toolbar-controls {
     width: 100%;
@@ -411,6 +412,25 @@ main {
 .checkbox {
   margin: 0 auto;
   justify-self: center;
+}
+
+.select-playlist {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  margin: 0;
+  width: 100%;
+  overflow-y: scroll;
+
+  .select-playlist-header {
+    position: fixed;
+    top: 0;
+  }
+
+  .select-playlist-footer {
+    position: fixed;
+    bottom: 0;
+  }
 }
 
 .app img {

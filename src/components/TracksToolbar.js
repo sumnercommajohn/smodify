@@ -15,7 +15,7 @@ class TracksToolbar extends React.Component {
   render() {
     const {
       clearSelection, allTracksChecked, numberOfChecked,
-      deleteSelectedTracks, setSearchString,
+      deleteSelectedTracks, ownedByUser, toggleSelectPlaylist,
     } = this.props;
 
     return (
@@ -29,7 +29,10 @@ class TracksToolbar extends React.Component {
                 <>
                   {this.printNumberOfChecked()}
                   <button type="button" className="clear-selection" onClick={clearSelection}>X</button>
+                  <button type="button" className="action remove-tracks" onClick={toggleSelectPlaylist}>Add To...</button>
+                  {ownedByUser && (
                   <button type="button" className="danger remove-tracks" onClick={deleteSelectedTracks}>Remove</button>
+                  )}
                 </>
               )}
         </div>

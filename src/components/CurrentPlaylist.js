@@ -188,11 +188,14 @@ class CurrentPlaylist extends React.Component {
     const {
       errorMessage,
       isEditing,
+      SelectPlaylistComponent,
       playlist, playlist: { images },
       updateUserPlaylists,
       deletePlaylist,
       toggleEditPlaylist,
       token,
+      isSelectPlaylistOpen,
+      toggleSelectPlaylist,
     } = this.props;
     const {
       draftPlaylist, tracks: { items }, ownedByUser, searchString,
@@ -203,61 +206,64 @@ class CurrentPlaylist extends React.Component {
     const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
       <main className="current-playlist">
-
-        <PlaylistHeader imageSrc={imageSrc}>
-          {isEditing
-            ? (
-              <EditPlaylistDetails
-                draftPlaylist={draftPlaylist}
-                updateDraftPlaylist={this.updateDraftPlaylist}
-                resetDraftPlaylist={this.resetDraftPlaylist}
-                updateUserPlaylists={updateUserPlaylists}
-                token={token}
-                toggleEditPlaylist={toggleEditPlaylist}
-              />
-            )
-            : <PlaylistDetails playlist={playlist} />
-           }
-          <PlaylistButtons
-            duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
-            deletePlaylist={deletePlaylist}
-            isEditing={isEditing}
-            ownedByUser={ownedByUser}
-            toggleEditPlaylist={toggleEditPlaylist}
-          />
-        </PlaylistHeader>
-        {errorMessage && <ErrorMessage message={errorMessage} />}
-        {items.length >= 1
-        && (
-        <PlaylistTracks>
-          <div className="track-tools">
-            {ownedByUser
-          && (
-            <TracksToolbar
-              clearSelection={this.clearSelection}
-              toggleCheckedAll={this.toggleCheckedAll}
-              deleteSelectedTracks={this.deleteSelectedTracks}
-              setSearchString={this.setSearchString}
-              numberOfChecked={numberOfChecked}
-              allTracksChecked={allTracksChecked}
-            />
-          )
-          }
-            <FilterBar
-              searchString={searchString}
-              setSearchString={this.setSearchString}
-              clearSearchString={this.clearSearchString}
-            />
-          </div>
-          <TrackList
-            ownedByUser={ownedByUser}
-            filteredItems={filteredItems}
-            toggleSelection={this.toggleSelection}
-            toggleChecked={this.toggleChecked}
-          />
-        </PlaylistTracks>
-        )
-        }
+        {isSelectPlaylistOpen
+          ? (SelectPlaylistComponent)
+          : (
+            <>
+              <PlaylistHeader imageSrc={imageSrc}>
+                {isEditing
+                  ? (
+                    <EditPlaylistDetails
+                      draftPlaylist={draftPlaylist}
+                      updateDraftPlaylist={this.updateDraftPlaylist}
+                      resetDraftPlaylist={this.resetDraftPlaylist}
+                      updateUserPlaylists={updateUserPlaylists}
+                      token={token}
+                      toggleEditPlaylist={toggleEditPlaylist}
+                    />
+                  )
+                  : <PlaylistDetails playlist={playlist} />
+                }
+                <PlaylistButtons
+                  duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+                  deletePlaylist={deletePlaylist}
+                  isEditing={isEditing}
+                  ownedByUser={ownedByUser}
+                  toggleEditPlaylist={toggleEditPlaylist}
+                />
+              </PlaylistHeader>
+              {errorMessage && <ErrorMessage message={errorMessage} />}
+              {items.length >= 1
+              && (
+              <PlaylistTracks>
+                <div className="track-tools">
+                  <TracksToolbar
+                    clearSelection={this.clearSelection}
+                    toggleCheckedAll={this.toggleCheckedAll}
+                    toggleSelectPlaylist={toggleSelectPlaylist}
+                    deleteSelectedTracks={this.deleteSelectedTracks}
+                    setSearchString={this.setSearchString}
+                    numberOfChecked={numberOfChecked}
+                    ownedByUser={ownedByUser}
+                    allTracksChecked={allTracksChecked}
+                  />
+                  <FilterBar
+                    searchString={searchString}
+                    setSearchString={this.setSearchString}
+                    clearSearchString={this.clearSearchString}
+                  />
+                </div>
+                <TrackList
+                  ownedByUser={ownedByUser}
+                  filteredItems={filteredItems}
+                  toggleSelection={this.toggleSelection}
+                  toggleChecked={this.toggleChecked}
+                />
+              </PlaylistTracks>
+              )
+              }
+            </>
+          )}
       </main>
     );
   }

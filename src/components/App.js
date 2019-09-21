@@ -9,6 +9,7 @@ import { Welcome } from './Welcome';
 import { LoginLink } from './LoginLink';
 import UserPlaylists from './UserPlaylists';
 import CurrentPlaylist from './CurrentPlaylist';
+import SelectPlaylist from './SelectPlaylist';
 
 
 class App extends React.Component {
@@ -22,10 +23,11 @@ class App extends React.Component {
     currentPlaylist: {
       id: '',
       isEditing: false,
+      isSelectPlaylistOpen: false,
     },
     userPlaylists: {
       isOpen: true,
-      itemsObject: {},
+      items: {},
       nextPlaylistsEndpoint: null,
       needsRefresh: false,
     },
@@ -73,14 +75,22 @@ class App extends React.Component {
     }));
   }
 
+  toggleSelectPlaylist = () => {
+    this.setState(prevState => ({
+      currentPlaylist: {
+        ...prevState.currentPlaylist,
+        isSelectPlaylistOpen: !prevState.currentPlaylist.isSelectPlaylistOpen,
+      },
+    }));
+  }
 
   getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
-      const itemsObject = arrayToObject(playlistsObject.items, 'id');
+      const items = arrayToObject(playlistsObject.items, 'id');
       this.setState(prevState => ({
         userPlaylists: {
-          itemsObject: { ...prevState.userPlaylists.itemsObject, ...itemsObject },
+          items: { ...prevState.userPlaylists.items, ...items },
           nextPlaylistsEndpoint: playlistsObject.next,
           needsRefresh: false,
           isOpen: prevState.userPlaylists.isOpen,
@@ -129,7 +139,7 @@ class App extends React.Component {
     try {
       await unfollowPlaylist(token, id);
       this.setState((prevState) => {
-        const updatedPlaylists = { ...prevState.userPlaylists.itemsObject };
+        const updatedPlaylists = { ...prevState.userPlaylists.items };
         delete updatedPlaylists[id];
         return ({
           currentPlaylist: {
@@ -138,7 +148,7 @@ class App extends React.Component {
           },
           userPlaylists: {
             ...prevState.userPlaylists,
-            itemsObject: { ...updatedPlaylists },
+            items: { ...updatedPlaylists },
           },
         });
       });
@@ -150,12 +160,12 @@ class App extends React.Component {
 
   updateUserPlaylists = (playlist) => {
     this.setState((prevState) => {
-      const playlistItems = { ...prevState.userPlaylists.itemsObject };
+      const playlistItems = { ...prevState.userPlaylists.items };
       playlistItems[playlist.id] = playlist;
       return ({
         userPlaylists: {
           ...prevState.userPlaylists,
-          itemsObject: { ...playlistItems },
+          items: { ...playlistItems },
         },
       });
     });
@@ -169,10 +179,10 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
-      userPlaylists: { itemsObject, isOpen },
+      userPlaylists: { items, isOpen },
       errorMessage,
     } = this.state;
-    const playlist = itemsObject[currentPlaylist.id];
+    const playlist = items[currentPlaylist.id];
     return (
       <div className="app">
         <Sidebar>
@@ -200,14 +210,23 @@ class App extends React.Component {
               token={token}
               userId={user.id}
               isEditing={currentPlaylist.isEditing}
+              isSelectPlaylistOpen={currentPlaylist.isSelectPlaylistOpen}
               errorMessage={errorMessage}
               playlist={playlist}
               refreshPlaylists={this.refreshPlaylists}
               setCurrentPlaylist={this.setCurrentPlaylist}
               toggleEditPlaylist={this.toggleEditPlaylist}
+              toggleSelectPlaylist={this.toggleSelectPlaylist}
               deletePlaylist={this.deletePlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}
+              SelectPlaylistComponent={(
+                <SelectPlaylist
+                  items={userPlaylists.items}
+                  userId={user.id}
+                  toggleSelectPlaylist={this.toggleSelectPlaylist}
+                />
+)}
             />
           )
           : <Dashboard errorMessage={errorMessage} />

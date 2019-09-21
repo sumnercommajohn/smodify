@@ -8,14 +8,14 @@ class TrackItem extends React.PureComponent {
 
   render() {
     const {
-      name, artists, album, uid, isChecked, ownedByUser,
+      name, artists, album, uid, isChecked,
     } = this.props;
     const itemClass = `playlist-track-row${isChecked ? ' checked' : ''}`;
 
     return (
       <li className={itemClass}>
         <label className="checkbox-label" htmlFor={uid}>
-          <input className="checkbox" type="checkbox" disabled={!ownedByUser} id={uid} onChange={this.handleChange} checked={isChecked} />
+          <input className="checkbox" type="checkbox" id={uid} onChange={this.handleChange} checked={isChecked} />
         </label>
         <div className="song-details">
           <span className="song-title">{name}</span>
