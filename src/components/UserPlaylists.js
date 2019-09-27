@@ -23,7 +23,7 @@ class UserPlaylists extends React.Component {
       userPlaylists: { nextPlaylistsEndpoint, needsRefresh },
     } = this.props;
 
-    if (needsRefresh) {
+    if (!prevProps.needsRefresh && needsRefresh) {
       getUserPlaylists(token);
     }
 

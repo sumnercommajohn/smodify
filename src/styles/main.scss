@@ -423,10 +423,14 @@ main {
   overflow-y: scroll;
 
   .select-playlist-header {
-    position: fixed;
+    font-weight: 900;
+    position: sticky;
     top: 0;
+    padding: 1rem;
   }
-
+  .select-playlist-list {
+    margin-bottom: 4rem;
+  }
   .select-playlist-footer {
     position: fixed;
     bottom: 0;

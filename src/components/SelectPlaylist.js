@@ -3,7 +3,7 @@ import SelectPlaylistItem from './SelectPlaylistItem';
 
 class SelectPlaylist extends React.Component {
   state= {
-    newPlaylistIsChecked: false,
+    addToNewPlaylist: false,
     checkedPlaylistIds: [],
   }
 
@@ -20,20 +20,35 @@ class SelectPlaylist extends React.Component {
     });
   }
 
+  toggleAddToNewPlaylist = () => {
+    this.setState(prevState => ({
+      addToNewPlaylist: !prevState.addToNewPlaylist,
+    }));
+  }
+
+  handleSubmit = (e) => {
+    const { trackItems, addTracksToOtherPlaylists, toggleSelectPlaylist } = this.props;
+    const { addToNewPlaylist, checkedPlaylistIds } = this.state;
+    const tracksToAdd = trackItems.filter(item => item.isChecked);
+    addTracksToOtherPlaylists(checkedPlaylistIds, tracksToAdd, addToNewPlaylist);
+    e.preventDefault();
+    toggleSelectPlaylist();
+  }
+
   render() {
     const {
-      items, userId, toggleSelectPlaylist,
+      userPlaylistItems, userId, toggleSelectPlaylist,
     } = this.props;
-    const filteredItems = Object.values(items).filter(item => userId === item.owner.id);
+    const filteredItems = Object.values(userPlaylistItems).filter(item => userId === item.owner.id);
     return (
       <div className="select-playlist">
         <div className="select-playlist-header playlist-track-row">
           Select playlists to add tracks to:
         </div>
-        <ul>
+        <ul className="select-playlist-list">
           <li className="playlist-track-row">
             <label className="checkbox-label" htmlFor="new-playlist">
-              <input className="checkbox" type="checkbox" id="new-playlist" />
+              <input className="checkbox" type="checkbox" id="new-playlist" onChange={this.toggleAddToNewPlaylist} />
             </label>
             <div className="song-details">
               <span className="song-title">+ New Playlist...</span>
@@ -49,7 +64,7 @@ class SelectPlaylist extends React.Component {
         ))}
         </ul>
         <div className="select-playlist-footer playlist-track-row song-details song-title">
-          <button type="button" className="action">Add Songs</button>
+          <button type="submit" className="action" onClick={this.handleSubmit}>Add Songs</button>
           <button type="button" className="danger" onClick={toggleSelectPlaylist}>Cancel</button>
         </div>
       </div>

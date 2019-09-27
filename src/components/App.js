@@ -1,6 +1,9 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyAPIhelpers';
+import {
+  fetchProfile, fetchSomePlaylists, unfollowPlaylist, fetchPlaylistImage,
+  createNewPlaylist, postAllTracks, getTracklistURIs,
+} from '../helpers/spotifyAPIhelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../helpers/authHelpers';
 import { arrayToObject } from '../helpers/otherHelpers';
 import { Dashboard } from './Dashboard';
@@ -9,7 +12,6 @@ import { Welcome } from './Welcome';
 import { LoginLink } from './LoginLink';
 import UserPlaylists from './UserPlaylists';
 import CurrentPlaylist from './CurrentPlaylist';
-import SelectPlaylist from './SelectPlaylist';
 
 
 class App extends React.Component {
@@ -85,22 +87,29 @@ class App extends React.Component {
   }
 
   getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
+    const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
       const items = arrayToObject(playlistsObject.items, 'id');
-      this.setState(prevState => ({
-        userPlaylists: {
-          items: { ...prevState.userPlaylists.items, ...items },
-          nextPlaylistsEndpoint: playlistsObject.next,
-          needsRefresh: false,
-          isOpen: prevState.userPlaylists.isOpen,
-        },
-      }));
+      this.setState((prevState) => {
+        const existingItems = needsRefresh
+          ? {}
+          : prevState.userPlaylists.items;
+        return ({
+          userPlaylists: {
+            items: { ...existingItems, ...items },
+            nextPlaylistsEndpoint: playlistsObject.next,
+            needsRefresh: false,
+            isOpen: prevState.userPlaylists.isOpen,
+          },
+        });
+      });
       this.setError();
     } catch (error) {
       this.setError(error);
     }
   }
+
 
   refreshPlaylists = () => {
     this.setState(prevstate => ({
@@ -155,6 +164,51 @@ class App extends React.Component {
       this.setError();
     } catch (error) {
       this.setError();
+    }
+  }
+
+
+  addTracksToOtherPlaylists = async (checkedPlaylistIds, tracksToAdd, addToNewPlaylist = false) => {
+    const { token, user: { id } } = this.state;
+    const trackURIs = getTracklistURIs(tracksToAdd);
+
+    if (checkedPlaylistIds.length >= 1) {
+      try {
+        const allPromises = checkedPlaylistIds
+          .map(playlistId => postAllTracks(token, playlistId, trackURIs));
+
+        await Promise.all(allPromises);
+
+        checkedPlaylistIds.forEach((playlistId) => {
+          const playlist = { ...this.state.userPlaylists.items[playlistId] };
+          const prevTotal = playlist.tracks.total;
+          playlist.tracks.total = tracksToAdd.length + prevTotal;
+          this.updateUserPlaylists(playlist);
+        });
+      } catch (error) {
+        this.setError(error);
+      }
+    }
+
+    if (addToNewPlaylist) {
+      const firstTrack = tracksToAdd[0].track;
+      console.log(firstTrack);
+      try {
+        const newPlaylist = await createNewPlaylist(token, id, firstTrack.name);
+        console.log(newPlaylist.id);
+        await postAllTracks(token, newPlaylist.id, trackURIs);
+        newPlaylist.tracks = {
+          total: tracksToAdd.length,
+          href: `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`,
+        };
+        const newImages = await fetchPlaylistImage(token, newPlaylist.id);
+        newPlaylist.images = newImages;
+        this.updateUserPlaylists(newPlaylist);
+        this.setCurrentPlaylist(newPlaylist);
+        this.toggleEditPlaylist();
+      } catch (error) {
+        this.setError(error);
+      }
     }
   }
 
@@ -213,20 +267,15 @@ class App extends React.Component {
               isSelectPlaylistOpen={currentPlaylist.isSelectPlaylistOpen}
               errorMessage={errorMessage}
               playlist={playlist}
-              refreshPlaylists={this.refreshPlaylists}
+              userPlaylistItems={userPlaylists.items}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              refreshPlaylists={this.refreshPlaylists}
               toggleEditPlaylist={this.toggleEditPlaylist}
               toggleSelectPlaylist={this.toggleSelectPlaylist}
+              addTracksToOtherPlaylists={this.addTracksToOtherPlaylists}
               deletePlaylist={this.deletePlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}
-              SelectPlaylistComponent={(
-                <SelectPlaylist
-                  items={userPlaylists.items}
-                  userId={user.id}
-                  toggleSelectPlaylist={this.toggleSelectPlaylist}
-                />
-)}
             />
           )
           : <Dashboard errorMessage={errorMessage} />

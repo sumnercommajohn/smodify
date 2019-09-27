@@ -11,6 +11,7 @@ import EditPlaylistDetails from './EditPlaylistDetails';
 import PlaylistTracks from './PlaylistTracks';
 import TracksToolbar from './TracksToolbar';
 import TrackList from './TrackList';
+import SelectPlaylist from './SelectPlaylist';
 
 
 class CurrentPlaylist extends React.Component {
@@ -186,16 +187,18 @@ class CurrentPlaylist extends React.Component {
 
   render() {
     const {
+      userId,
+      token,
       errorMessage,
       isEditing,
-      SelectPlaylistComponent,
       playlist, playlist: { images },
+      userPlaylistItems,
       updateUserPlaylists,
       deletePlaylist,
       toggleEditPlaylist,
-      token,
       isSelectPlaylistOpen,
       toggleSelectPlaylist,
+      addTracksToOtherPlaylists,
     } = this.props;
     const {
       draftPlaylist, tracks: { items }, ownedByUser, searchString,
@@ -207,7 +210,15 @@ class CurrentPlaylist extends React.Component {
     return (
       <main className="current-playlist">
         {isSelectPlaylistOpen
-          ? (SelectPlaylistComponent)
+          ? (
+            <SelectPlaylist
+              toggleSelectPlaylist={toggleSelectPlaylist}
+              addTracksToOtherPlaylists={addTracksToOtherPlaylists}
+              userPlaylistItems={userPlaylistItems}
+              trackItems={items}
+              userId={userId}
+            />
+          )
           : (
             <>
               <PlaylistHeader imageSrc={imageSrc}>
