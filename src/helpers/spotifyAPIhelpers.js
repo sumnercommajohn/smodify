@@ -17,7 +17,7 @@ export async function fetchProfile(token) {
   return outcome;
 }
 
-// -------------------------------------Playlist Helpers
+// -------------------------------------Playlist Fetchers
 export async function fetchSomePlaylists(token, endpoint = 'https://api.spotify.com/v1/me/playlists') {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', `Bearer ${token}`);
@@ -36,6 +36,44 @@ export async function fetchSomePlaylists(token, endpoint = 'https://api.spotify.
   return outcome;
 }
 
+export async function fetchSinglePlaylist(token, playlistId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+  const endpoint = `https://api.spotify.com/v1/playlists/${playlistId}`;
+  const outcome = await fetch(endpoint, {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
+}
+
+export async function fetchPlaylistImage(token, playlistId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', `Bearer ${token}`);
+  const endpoint = `https://api.spotify.com/v1/playlists/${playlistId}/images`;
+  const outcome = await fetch(endpoint, {
+    method: 'GET',
+    headers: myHeaders,
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(`Request rejected with status ${response.status}`);
+    });
+
+  return outcome;
+}
+
+
+// -------------------------------------Playlist Actions
 export async function createNewPlaylist(token, userId, playlistName) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', `Bearer ${token}`);
@@ -95,7 +133,7 @@ export async function unfollowPlaylist(token, id) {
     });
 }
 
-// -------------------------------------Track Helpers
+// -------------------------------------Track Fetchers
 
 export async function fetchSomeTracks(token, endpoint) {
   const myHeaders = new Headers();
@@ -121,7 +159,10 @@ export async function fetchSomeTracks(token, endpoint) {
 }
 
 
-function formatTracklistForPost(items) {
+// -------------------------------------Tracklist Actions
+
+
+export function getTracklistURIs(items) {
   return items.map((item => item.track.uri));
 }
 
@@ -157,10 +198,11 @@ export async function postAllTracks(token, playlistId, trackURIs, offset = 0, li
   if (response.offset < trackURIs.length) {
     await postAllTracks(token, playlistId, trackURIs, response.offset, limit);
   }
+  return response;
 }
 
 export async function clonePlaylist(token, userId, playlist, tracks) {
-  const trackURIs = formatTracklistForPost(tracks.items);
+  const trackURIs = getTracklistURIs(tracks.items);
   const newPlaylist = await createNewPlaylist(token, userId, `${playlist.name} (Copy)`);
   newPlaylist.images = [...playlist.images];
   tracks.href = `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`;

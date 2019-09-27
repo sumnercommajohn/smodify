@@ -107,6 +107,7 @@ main {
   padding: 1rem;
   overflow-x: visible;
   width: 100%;
+  // position: absolute;
 
   @media (min-width: 768px) {
     min-height: 100vh;
@@ -117,8 +118,29 @@ main {
 .sidebar-component {
   margin-bottom: 2rem;
 
+  &.welcome {
+    display: none;
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+
+    &.open {
+      display: block;
+    }
+  }
+
+  &:last-child {
+    margin-bottom: 1rem;
+  }
+
   .sidebar-title {
-    display: inline-block;
+    position: sticky;
+    top: 0;
+    background-color: $dark;
+    @media (min-width: 768px) {
+      position: relative;
+    }
   }
 
   .sidebar-toggle {
@@ -130,7 +152,6 @@ main {
     font-weight: 800;
     font-size: 2rem;
     padding: 1rem;
-
     @media (min-width: 768px) {
       display: none;
     }
@@ -139,7 +160,7 @@ main {
 
 .user-playlists {
   margin: 0 auto;
-  display: grid;
+  // display: grid;
   grid-template-columns: 1fr;
   font-weight: 500;
   display: none;
@@ -280,14 +301,11 @@ main {
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  // justify-content: right;
 }
 
 .playlist-track-row {
   width: 100%;
-  // font-size: 1.5rem;
   display: flex;
-
   border: 1.5px solid #ffffff;
   z-index: 1;
 
@@ -296,7 +314,7 @@ main {
     text-align: center;
     min-width: 6rem;
     min-height: 6rem;
-
+    cursor: pointer;
     justify-items: center;
     align-items: center;
   }
@@ -308,34 +326,64 @@ main {
     background-color: #fcfcfc;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.178), 0 0px 5px rgba(0, 0, 0, 0.137);
     border: 1.5px solid scale-color($blue, $alpha: -50%);
-    // z-index: 2;
   }
 }
 
-.tracks-toolbar {
-  border-bottom: 1px solid #a1a1a162;
+.track-tools {
   position: sticky;
   top: 0;
+}
+
+.tracks-toolbar {
+  border-bottom: 1px solid #a1a1a1;
   display: flex;
   align-items: center;
+  font-size: 1.5rem;
 
   .toolbar-controls {
     width: 100%;
+    align-items: center;
     .remove-tracks {
       float: right;
     }
 
-    .clear-selection {
+    .clear-selection,
+    .clear-filter {
+      display: inline;
       color: $dark;
-      height: 2rem;
-      width: 2rem;
+      background: $light;
       border-radius: 50%;
-      margin: 0 2px;
+      font-size: 1.5rem;
+      padding: 0.5rem 0.7rem;
+      line-height: 0;
+      box-shadow: none;
 
       &:hover {
         background: $dark;
         color: white;
       }
+    }
+  }
+}
+
+.filter-bar {
+  position: relative;
+  input {
+    width: 100%;
+  }
+  .clear-filter {
+    display: inline;
+    position: absolute;
+    right: 0;
+    color: $dark;
+    background: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    padding: 0 0.7rem;
+    box-shadow: none;
+
+    &:hover {
+      box-shadow: none;
     }
   }
 }
@@ -364,6 +412,29 @@ main {
 .checkbox {
   margin: 0 auto;
   justify-self: center;
+}
+
+.select-playlist {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  margin: 0;
+  width: 100%;
+  overflow-y: scroll;
+
+  .select-playlist-header {
+    font-weight: 900;
+    position: sticky;
+    top: 0;
+    padding: 1rem;
+  }
+  .select-playlist-list {
+    margin-bottom: 4rem;
+  }
+  .select-playlist-footer {
+    position: fixed;
+    bottom: 0;
+  }
 }
 
 .app img {
