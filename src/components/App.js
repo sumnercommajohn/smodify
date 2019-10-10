@@ -1,7 +1,11 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import { fetchProfile, fetchSomePlaylists, unfollowPlaylist } from '../helpers/spotifyHelpers';
+import {
+  fetchProfile, fetchSomePlaylists, unfollowPlaylist, fetchPlaylistImage,
+  createNewPlaylist, postAllTracks, getTracklistURIs,
+} from '../helpers/spotifyAPIhelpers';
 import { checkURIforError, getTokenFromURI, getTokenFromLocal } from '../helpers/authHelpers';
+import { arrayToObject } from '../helpers/otherHelpers';
 import { Dashboard } from './Dashboard';
 import { Sidebar } from './Sidebar';
 import { Welcome } from './Welcome';
@@ -21,10 +25,11 @@ class App extends React.Component {
     currentPlaylist: {
       id: '',
       isEditing: false,
+      isSelectPlaylistOpen: false,
     },
     userPlaylists: {
       isOpen: true,
-      items: [],
+      items: {},
       nextPlaylistsEndpoint: null,
       needsRefresh: false,
     },
@@ -72,22 +77,32 @@ class App extends React.Component {
     }));
   }
 
+  toggleSelectPlaylist = () => {
+    this.setState(prevState => ({
+      currentPlaylist: {
+        ...prevState.currentPlaylist,
+        isSelectPlaylistOpen: !prevState.currentPlaylist.isSelectPlaylistOpen,
+      },
+    }));
+  }
 
   getUserPlaylists = async (token, endpoint = 'https://api.spotify.com/v1/me/playlists') => {
     const { needsRefresh } = this.state.userPlaylists;
     try {
       const playlistsObject = await fetchSomePlaylists(token, endpoint);
+      const items = arrayToObject(playlistsObject.items, 'id');
       this.setState((prevState) => {
         const existingItems = needsRefresh
-          ? []
+          ? {}
           : prevState.userPlaylists.items;
-        return {
+        return ({
           userPlaylists: {
-            items: [...existingItems, ...playlistsObject.items],
+            items: { ...existingItems, ...items },
             nextPlaylistsEndpoint: playlistsObject.next,
             needsRefresh: false,
+            isOpen: prevState.userPlaylists.isOpen,
           },
-        };
+        });
       });
       this.setError();
     } catch (error) {
@@ -95,33 +110,6 @@ class App extends React.Component {
     }
   }
 
-  sortPlaylists = (sortBy, sortDescending = false) => {
-    const { items } = this.state.userPlaylists;
-    const playlistsMap = items.map((playlist, i) => ({
-      index: i,
-      name: playlist.name.toLowerCase(),
-      total: playlist.tracks.total,
-    }));
-    playlistsMap.sort((a, b) => {
-      if (a[`${sortBy}`] > b[`${sortBy}`]) {
-        return 1;
-      }
-      if (a[`${sortBy}`] < b[`${sortBy}`]) {
-        return -1;
-      }
-      return 0;
-    });
-    if (sortDescending) {
-      playlistsMap.reverse();
-    }
-    const playlistsSorted = playlistsMap.map(mapItem => items[mapItem.index]);
-    this.setState(prevstate => ({
-      userPlaylists: {
-        ...prevstate.userPlaylists,
-        items: [...playlistsSorted],
-      },
-    }));
-  };
 
   refreshPlaylists = () => {
     this.setState(prevstate => ({
@@ -156,40 +144,85 @@ class App extends React.Component {
   }
 
   deletePlaylist = async () => {
-    const { token, currentPlaylist: { id }, userPlaylists: { items } } = this.state;
-    const updatedPlaylists = items.filter(item => item.id !== id);
+    const { token, currentPlaylist: { id } } = this.state;
     try {
       await unfollowPlaylist(token, id);
-      this.setState(prevState => ({
-        currentPlaylist: {
-          id: '',
-          isEditing: false,
-        },
-        userPlaylists: {
-          ...prevState.userPlaylists,
-          items: [...updatedPlaylists],
-        },
-      }));
+      this.setState((prevState) => {
+        const updatedPlaylists = { ...prevState.userPlaylists.items };
+        delete updatedPlaylists[id];
+        return ({
+          currentPlaylist: {
+            id: '',
+            isEditing: false,
+          },
+          userPlaylists: {
+            ...prevState.userPlaylists,
+            items: { ...updatedPlaylists },
+          },
+        });
+      });
       this.setError();
     } catch (error) {
       this.setError();
     }
   }
 
-  updateUserPlaylists = (playlist) => {
-    const playlistItems = [...this.state.userPlaylists.items];
-    const targetIndex = playlistItems.findIndex(playlistItem => playlist.id === playlistItem.id);
-    if (targetIndex === -1) {
-      playlistItems.unshift(playlist);
-    } else {
-      playlistItems[targetIndex] = { ...playlist };
+
+  addTracksToOtherPlaylists = async (checkedPlaylistIds, tracksToAdd, addToNewPlaylist = false) => {
+    const { token, user: { id } } = this.state;
+    const trackURIs = getTracklistURIs(tracksToAdd);
+
+    if (checkedPlaylistIds.length >= 1) {
+      try {
+        const allPromises = checkedPlaylistIds
+          .map(playlistId => postAllTracks(token, playlistId, trackURIs));
+
+        await Promise.all(allPromises);
+
+        checkedPlaylistIds.forEach((playlistId) => {
+          const playlist = { ...this.state.userPlaylists.items[playlistId] };
+          const prevTotal = playlist.tracks.total;
+          playlist.tracks.total = tracksToAdd.length + prevTotal;
+          this.updateUserPlaylists(playlist);
+        });
+      } catch (error) {
+        this.setError(error);
+      }
     }
-    this.setState(prevState => ({
-      userPlaylists: {
-        ...prevState.userPlaylists,
-        items: [...playlistItems],
-      },
-    }));
+
+    if (addToNewPlaylist) {
+      const firstTrack = tracksToAdd[0].track;
+      console.log(firstTrack);
+      try {
+        const newPlaylist = await createNewPlaylist(token, id, firstTrack.name);
+        console.log(newPlaylist.id);
+        await postAllTracks(token, newPlaylist.id, trackURIs);
+        newPlaylist.tracks = {
+          total: tracksToAdd.length,
+          href: `https://api.spotify.com/v1/playlists/${newPlaylist.id}/tracks`,
+        };
+        const newImages = await fetchPlaylistImage(token, newPlaylist.id);
+        newPlaylist.images = newImages;
+        this.updateUserPlaylists(newPlaylist);
+        this.setCurrentPlaylist(newPlaylist);
+        this.toggleEditPlaylist();
+      } catch (error) {
+        this.setError(error);
+      }
+    }
+  }
+
+  updateUserPlaylists = (playlist) => {
+    this.setState((prevState) => {
+      const playlistItems = { ...prevState.userPlaylists.items };
+      playlistItems[playlist.id] = playlist;
+      return ({
+        userPlaylists: {
+          ...prevState.userPlaylists,
+          items: { ...playlistItems },
+        },
+      });
+    });
     this.setError();
   }
 
@@ -200,16 +233,15 @@ class App extends React.Component {
       token,
       currentPlaylist,
       userPlaylists,
-      userPlaylists: { items },
+      userPlaylists: { items, isOpen },
       errorMessage,
     } = this.state;
-    const playlist = items
-      .find(playlistItem => (playlistItem.id === currentPlaylist.id));
+    const playlist = items[currentPlaylist.id];
     return (
       <div className="app">
         <Sidebar>
           { user.name
-            ? <Welcome user={user.name} />
+            ? <Welcome name={user.name} isOpen={isOpen} />
             : <LoginLink message="Login to Spotify to get started." />
             }
           { user.name
@@ -232,11 +264,15 @@ class App extends React.Component {
               token={token}
               userId={user.id}
               isEditing={currentPlaylist.isEditing}
+              isSelectPlaylistOpen={currentPlaylist.isSelectPlaylistOpen}
               errorMessage={errorMessage}
               playlist={playlist}
-              refreshPlaylists={this.refreshPlaylists}
+              userPlaylistItems={userPlaylists.items}
               setCurrentPlaylist={this.setCurrentPlaylist}
+              refreshPlaylists={this.refreshPlaylists}
               toggleEditPlaylist={this.toggleEditPlaylist}
+              toggleSelectPlaylist={this.toggleSelectPlaylist}
+              addTracksToOtherPlaylists={this.addTracksToOtherPlaylists}
               deletePlaylist={this.deletePlaylist}
               updateUserPlaylists={this.updateUserPlaylists}
               setError={this.setError}

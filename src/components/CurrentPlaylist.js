@@ -1,20 +1,24 @@
 import React from 'react';
 import macaroon from '../assets/img/Macaroonicon.png';
-import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyHelpers';
+import { clonePlaylist, fetchSomeTracks, removeSelectedTracks } from '../helpers/spotifyAPIhelpers';
+import { matchTracks } from '../helpers/otherHelpers';
 import { PlaylistHeader } from './PlaylistHeader';
-import EditPlaylistDetails from './EditPlaylistDetails';
 import { PlaylistDetails } from './PlaylistDetails';
 import { PlaylistButtons } from './PlaylistButtons';
 import { ErrorMessage } from './ErrorMessage';
+import { FilterBar } from './FilterBar';
+import EditPlaylistDetails from './EditPlaylistDetails';
 import PlaylistTracks from './PlaylistTracks';
 import TracksToolbar from './TracksToolbar';
 import TrackList from './TrackList';
+import SelectPlaylist from './SelectPlaylist';
 
 
 class CurrentPlaylist extends React.Component {
   state = {
     draftPlaylist: this.props.playlist,
     ownedByUser: (this.props.userId === this.props.playlist.owner.id),
+    searchString: '',
     tracks: {
       items: [],
     },
@@ -32,11 +36,13 @@ class CurrentPlaylist extends React.Component {
     const { token, updateUserPlaylists } = this.props;
     const { nextTracksEndpoint, draftPlaylist } = this.state;
 
+    // continues loading tracks if playlist contains more than request limit (100 tracks)
     if (nextTracksEndpoint && nextTracksEndpoint !== prevState.nextTracksEndpoint) {
       this.getSomeTracks(token, nextTracksEndpoint);
     }
+
+    // updates the number of tracks as displayed in UserPlaylists
     if (draftPlaylist.tracks.total !== prevState.draftPlaylist.tracks.total) {
-      console.log('updating draft playlist');
       updateUserPlaylists(draftPlaylist);
     }
   }
@@ -67,6 +73,18 @@ class CurrentPlaylist extends React.Component {
     }
   }
 
+  setSearchString = (e) => {
+    console.log(e);
+    const searchString = e.target.value;
+    this.setState({ searchString });
+  }
+
+  clearSearchString = () => {
+    console.log('clearing');
+    const searchString = '';
+    this.setState({ searchString });
+  }
+
   toggleChecked = (uid, checkedState) => {
     this.setState((prevState) => {
       const items = [...prevState.tracks.items];
@@ -75,10 +93,22 @@ class CurrentPlaylist extends React.Component {
       return ({
         tracks: {
           ...prevState.tracks,
-          items: [...items],
+          items,
         },
       });
     });
+  }
+
+  toggleCheckedAll = (allTracksChecked = false) => {
+    const { searchString, tracks: { items } } = this.state;
+    const filteredItems = matchTracks(searchString, items);
+    this.setState(prevState => ({
+      ...prevState.tracks,
+      items: filteredItems.map((item) => {
+        item.isChecked = !allTracksChecked;
+        return item;
+      }),
+    }));
   }
 
   clearSelection = () => {
@@ -93,24 +123,12 @@ class CurrentPlaylist extends React.Component {
     }));
   }
 
-  selectAll = () => {
-    this.setState(prevState => ({
-      tracks: {
-        ...prevState.tracks,
-        items: (prevState.tracks.items.map((item) => {
-          item.isChecked = true;
-          return item;
-        })),
-      },
-    }));
-  }
 
-  // TODO: don't need updateDraftPlaylist, can just update in setState
   deleteSelectedTracks = async () => {
     const {
       token, playlist, setError,
     } = this.props;
-    const { tracks: { items }, draftPlaylist } = this.state;
+    const { tracks: { items } } = this.state;
     const selection = items.filter(item => item.isChecked === true);
     try {
       const response = await removeSelectedTracks(token, playlist, selection);
@@ -128,6 +146,7 @@ class CurrentPlaylist extends React.Component {
           items: [...remaining],
         },
       }));
+      setError();
     } catch (error) {
       setError(error);
     }
@@ -151,11 +170,11 @@ class CurrentPlaylist extends React.Component {
     refreshPlaylists();
   }
 
-  updateDraftPlaylist = (updatesObject) => {
+  updateDraftPlaylist = (updatedFieldsObject) => {
     this.setState(prevState => ({
       draftPlaylist: {
         ...prevState.draftPlaylist,
-        ...updatesObject,
+        ...updatedFieldsObject,
       },
     }));
   }
@@ -168,64 +187,94 @@ class CurrentPlaylist extends React.Component {
 
   render() {
     const {
+      userId,
+      token,
       errorMessage,
       isEditing,
       playlist, playlist: { images },
+      userPlaylistItems,
       updateUserPlaylists,
       deletePlaylist,
       toggleEditPlaylist,
-      token,
+      isSelectPlaylistOpen,
+      toggleSelectPlaylist,
+      addTracksToOtherPlaylists,
     } = this.props;
     const {
-      draftPlaylist, tracks: { items }, ownedByUser,
+      draftPlaylist, tracks: { items }, ownedByUser, searchString,
     } = this.state;
     const imageSrc = images.length ? images[0].url : macaroon;
-    const allTracksChecked = items.every(item => item.isChecked);
+    const filteredItems = searchString.length > 0 ? matchTracks(searchString, items) : items;
+    const allTracksChecked = filteredItems.every(item => item.isChecked);
     const numberOfChecked = items.filter(item => item.isChecked).length;
     return (
       <main className="current-playlist">
-
-        <PlaylistHeader imageSrc={imageSrc}>
-          {isEditing
-            ? (
-              <EditPlaylistDetails
-                draftPlaylist={draftPlaylist}
-                updateDraftPlaylist={this.updateDraftPlaylist}
-                resetDraftPlaylist={this.resetDraftPlaylist}
-                updateUserPlaylists={updateUserPlaylists}
-                token={token}
-                toggleEditPlaylist={toggleEditPlaylist}
-              />
-            )
-            : <PlaylistDetails playlist={playlist} />
-           }
-          <PlaylistButtons
-            duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
-            deletePlaylist={deletePlaylist}
-            isEditing={isEditing}
-            ownedByUser={ownedByUser}
-            toggleEditPlaylist={toggleEditPlaylist}
-          />
-        </PlaylistHeader>
-        {errorMessage && <ErrorMessage message={errorMessage} />}
-        {items.length >= 1
-        && (
-        <PlaylistTracks>
-          <TracksToolbar
-            clearSelection={this.clearSelection}
-            selectAll={this.selectAll}
-            allTracksChecked={allTracksChecked}
-            numberOfChecked={numberOfChecked}
-            deleteSelectedTracks={this.deleteSelectedTracks}
-          />
-          <TrackList
-            items={items}
-            toggleSelection={this.toggleSelection}
-            toggleChecked={this.toggleChecked}
-          />
-        </PlaylistTracks>
-        )
-        }
+        {isSelectPlaylistOpen
+          ? (
+            <SelectPlaylist
+              toggleSelectPlaylist={toggleSelectPlaylist}
+              addTracksToOtherPlaylists={addTracksToOtherPlaylists}
+              userPlaylistItems={userPlaylistItems}
+              trackItems={items}
+              userId={userId}
+            />
+          )
+          : (
+            <>
+              <PlaylistHeader imageSrc={imageSrc}>
+                {isEditing
+                  ? (
+                    <EditPlaylistDetails
+                      draftPlaylist={draftPlaylist}
+                      updateDraftPlaylist={this.updateDraftPlaylist}
+                      resetDraftPlaylist={this.resetDraftPlaylist}
+                      updateUserPlaylists={updateUserPlaylists}
+                      token={token}
+                      toggleEditPlaylist={toggleEditPlaylist}
+                    />
+                  )
+                  : <PlaylistDetails playlist={playlist} />
+                }
+                <PlaylistButtons
+                  duplicateCurrentPlaylist={this.duplicateCurrentPlaylist}
+                  deletePlaylist={deletePlaylist}
+                  isEditing={isEditing}
+                  ownedByUser={ownedByUser}
+                  toggleEditPlaylist={toggleEditPlaylist}
+                />
+              </PlaylistHeader>
+              {errorMessage && <ErrorMessage message={errorMessage} />}
+              {items.length >= 1
+              && (
+              <PlaylistTracks>
+                <div className="track-tools">
+                  <TracksToolbar
+                    clearSelection={this.clearSelection}
+                    toggleCheckedAll={this.toggleCheckedAll}
+                    toggleSelectPlaylist={toggleSelectPlaylist}
+                    deleteSelectedTracks={this.deleteSelectedTracks}
+                    setSearchString={this.setSearchString}
+                    numberOfChecked={numberOfChecked}
+                    ownedByUser={ownedByUser}
+                    allTracksChecked={allTracksChecked}
+                  />
+                  <FilterBar
+                    searchString={searchString}
+                    setSearchString={this.setSearchString}
+                    clearSearchString={this.clearSearchString}
+                  />
+                </div>
+                <TrackList
+                  ownedByUser={ownedByUser}
+                  filteredItems={filteredItems}
+                  toggleSelection={this.toggleSelection}
+                  toggleChecked={this.toggleChecked}
+                />
+              </PlaylistTracks>
+              )
+              }
+            </>
+          )}
       </main>
     );
   }

@@ -3,11 +3,13 @@ import TrackItem from './TrackItem';
 
 class TrackList extends React.Component {
   render() {
-    const { items, toggleSelection, toggleChecked } = this.props;
+    const {
+      filteredItems, toggleChecked, ownedByUser,
+    } = this.props;
     return (
       <ul className="tracklist">
-        {items
-      && items.map(trackItem => (
+        {filteredItems
+      && filteredItems.map(trackItem => (
         <TrackItem
           key={trackItem.uid}
           uid={trackItem.uid}
@@ -15,8 +17,8 @@ class TrackList extends React.Component {
           album={trackItem.track.album}
           artists={trackItem.track.artists}
           name={trackItem.track.name}
-          toggleSelection={toggleSelection}
           toggleChecked={toggleChecked}
+          ownedByUser={ownedByUser}
         />
       ))}
       </ul>

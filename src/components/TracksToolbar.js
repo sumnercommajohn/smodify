@@ -2,12 +2,8 @@ import React from 'react';
 
 class TracksToolbar extends React.Component {
   handleChange = () => {
-    const { allTracksChecked, clearSelection, selectAll } = this.props;
-    if (!allTracksChecked) {
-      selectAll();
-    } else {
-      clearSelection();
-    }
+    const { toggleCheckedAll, allTracksChecked } = this.props;
+    toggleCheckedAll(allTracksChecked);
   };
 
   printNumberOfChecked = () => {
@@ -19,7 +15,7 @@ class TracksToolbar extends React.Component {
   render() {
     const {
       clearSelection, allTracksChecked, numberOfChecked,
-      deleteSelectedTracks,
+      deleteSelectedTracks, ownedByUser, toggleSelectPlaylist,
     } = this.props;
 
     return (
@@ -32,8 +28,11 @@ class TracksToolbar extends React.Component {
               && (
                 <>
                   {this.printNumberOfChecked()}
-                  <button type="button" className="clear-selection" onClick={clearSelection}>x</button>
+                  <button type="button" className="clear-selection" onClick={clearSelection}>X</button>
+                  <button type="button" className="action remove-tracks" onClick={toggleSelectPlaylist}>Add To...</button>
+                  {ownedByUser && (
                   <button type="button" className="danger remove-tracks" onClick={deleteSelectedTracks}>Remove</button>
+                  )}
                 </>
               )}
         </div>
